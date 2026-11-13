@@ -1,6 +1,6 @@
 {
-  "accuracy": 88.6,
-  "accuracy_std": 0.58,
+  "accuracy": 87.82,
+  "accuracy_std": 0.75,
   "total_samples": 6000,
   "classes": [
     "Healthy Baseline",
@@ -18,82 +18,82 @@
   ],
   "confusion_matrix": [
     [
-      1092,
-      24,
-      18,
-      48,
-      18
+      1125,
+      11,
+      0,
+      0,
+      64
     ],
     [
-      30,
-      1044,
-      86,
-      24,
-      16
+      261,
+      809,
+      0,
+      0,
+      130
     ],
     [
-      34,
-      92,
-      1026,
-      26,
-      22
+      0,
+      2,
+      1198,
+      0,
+      0
     ],
     [
-      52,
-      28,
-      22,
-      1068,
-      30
+      0,
+      0,
+      0,
+      1200,
+      0
     ],
     [
-      26,
-      22,
-      32,
-      34,
-      1086
+      224,
+      31,
+      0,
+      8,
+      937
     ]
   ],
   "top_features": [
     {
-      "feature": "crest_factor",
-      "importance": 10.37
-    },
-    {
-      "feature": "clicks_per_sec",
-      "importance": 9.09
-    },
-    {
-      "feature": "ici_mean",
-      "importance": 7.79
-    },
-    {
-      "feature": "energy_high_6500hz",
-      "importance": 7.62
-    },
-    {
-      "feature": "click_count",
-      "importance": 7.18
-    },
-    {
-      "feature": "waveform_kurtosis",
-      "importance": 6.75
+      "feature": "burst_temporal_ratio",
+      "importance": 14.56
     },
     {
       "feature": "frame_energy_variance",
-      "importance": 6.31
+      "importance": 7.72
     },
     {
-      "feature": "waveform_skewness",
-      "importance": 5.54
+      "feature": "ici_mean",
+      "importance": 7.28
+    },
+    {
+      "feature": "click_count",
+      "importance": 7.25
+    },
+    {
+      "feature": "waveform_kurtosis",
+      "importance": 6.97
+    },
+    {
+      "feature": "energy_high_6500hz",
+      "importance": 6.96
+    },
+    {
+      "feature": "clicks_per_sec",
+      "importance": 6.78
+    },
+    {
+      "feature": "crest_factor",
+      "importance": 6.04
     }
   ],
   "folds": 5,
   "cv_scores": [
-    88.2,
-    89.1,
-    87.8,
-    89.4,
-    88.5
+    87.83,
+    88.58,
+    87.92,
+    88.33,
+    86.42
   ],
-  "training_sources": "ESC-50 Real Acoustics + Plant Hydraulic Bio-Physical Models"
+  "training_sources": "Real Plant Acoustic Stem Recordings (Khait et al. Cell 2023 + Plant Stress Sound Dataset) + Bio-Physical Hydraulic Models"
 }

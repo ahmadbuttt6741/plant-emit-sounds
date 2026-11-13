@@ -5,6 +5,7 @@ __pycache__/
 
 # Distribution / packaging / local archives
 *.zip
+*.npz
 phytoecho_vercel_deployment.zip
 
 # Virtual Environments
@@ -16,6 +17,11 @@ ENV/
 # Temporary uploaded files
 demo/uploads/*
 !demo/uploads/.gitkeep
+
+# Extracted dataset working folders
+PlantSounds/
+plant_sounds-20241018T054206Z-001/
+raw_audio/
 
 # Vercel project state
 .vercel/

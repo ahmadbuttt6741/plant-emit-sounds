@@ -399,22 +399,27 @@
 
       <!-- Tab Content 2: Drag and Drop Uploader (White & Light Navy) -->
       <div id="content-upload" class="tab-content hidden transition-all">
+        <!-- Hidden file input placed outside drop-zone to avoid bubbling double-triggers -->
+        <input type="file" id="file-input" accept="audio/*,.wav,.mp3,.ogg,.flac,.webm,.m4a,.aac" class="hidden" onchange="handleFileSelect(this.files)">
+        
         <div id="drop-zone" 
-             class="bg-[#f7fafe] rounded-2xl border-2 border-dashed border-navy-300 hover:border-navy-600 hover:bg-navy-50/70 transition-all p-8 text-center flex flex-col items-center justify-center min-h-[220px] cursor-pointer group shadow-card">
-          <input type="file" id="file-input" accept="audio/*,.wav,.mp3,.ogg,.flac,.webm" class="hidden" onchange="handleFileSelect(this.files)">
-          <div class="w-16 h-16 rounded-2xl bg-navy-100 border border-navy-200 flex items-center justify-center text-navy-700 mb-3 group-hover:scale-110 transition-transform shadow-xs">
-            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+             class="bg-[#f7fafe] rounded-2xl border-2 border-dashed border-navy-300 hover:border-navy-600 hover:bg-navy-50/70 transition-all p-8 text-center flex flex-col items-center justify-center min-h-[220px] cursor-pointer group shadow-card select-none">
+          <div class="pointer-events-none w-16 h-16 rounded-2xl bg-navy-100 border border-navy-200 flex items-center justify-center text-navy-700 mb-3 group-hover:scale-110 transition-transform shadow-xs">
+            <svg class="pointer-events-none w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
             </svg>
           </div>
-          <p class="text-base font-bold text-navy-950">Drop your plant stem audio here</p>
-          <p class="text-xs text-navy-700 mt-1">or <span class="text-navy-800 underline font-semibold">browse files</span> on your device</p>
-          <div class="flex items-center gap-2 mt-4 text-xs text-navy-700 bg-navy-100/90 px-3.5 py-1.5 rounded-full border border-navy-200 font-medium">
+          <p class="pointer-events-none text-base font-bold text-navy-950">Drop your plant stem audio here</p>
+          <p class="pointer-events-none text-xs text-navy-700 mt-1">or <span class="text-navy-800 underline font-semibold">browse files</span> on your device</p>
+          <div class="pointer-events-none flex items-center gap-2 mt-4 text-xs text-navy-700 bg-navy-100/90 px-3.5 py-1.5 rounded-full border border-navy-200 font-medium">
             <span>Supports WAV, MP3, FLAC, OGG, WEBM</span>
             <span>•</span>
             <span>Up to 32MB</span>
           </div>
         </div>
+
+        <!-- Inline Upload Feedback & Notice Banner -->
+        <div id="upload-feedback" class="hidden mt-3 p-3.5 rounded-xl border transition-all"></div>
       </div>
 
       <!-- Tab Content 3: Live Microphone Recording -->
@@ -942,24 +947,80 @@
     ['dragenter', 'dragover'].forEach(eventName => {
       dropZone.addEventListener(eventName, (e) => {
         e.preventDefault();
-        dropZone.classList.add('border-navy-600', 'bg-navy-50/70');
+        e.stopPropagation();
+        dropZone.classList.add('border-navy-600', 'bg-navy-100/70', 'scale-[1.01]');
       }, false);
     });
 
     ['dragleave', 'drop'].forEach(eventName => {
       dropZone.addEventListener(eventName, (e) => {
         e.preventDefault();
-        dropZone.classList.remove('border-navy-600', 'bg-navy-50/70');
+        e.stopPropagation();
+        dropZone.classList.remove('border-navy-600', 'bg-navy-100/70', 'scale-[1.01]');
       }, false);
     });
 
     dropZone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
       const dt = e.dataTransfer;
-      const files = dt.files;
-      if (files.length > 0) handleFileSelect(files);
+      const files = dt ? dt.files : null;
+      if (files && files.length > 0) handleFileSelect(files);
     });
 
-    dropZone.addEventListener('click', () => fileInput.click());
+    dropZone.addEventListener('click', (e) => {
+      fileInput.value = '';
+      fileInput.click();
+    });
+
+    // Prevent default browser behavior on entire window to prevent accidental tab navigation on drop
+    window.addEventListener('dragover', (e) => e.preventDefault(), false);
+    window.addEventListener('drop', (e) => e.preventDefault(), false);
+
+    function formatBytes(bytes) {
+      if (!bytes || bytes === 0) return '0 B';
+      const k = 1024;
+      const sizes = ['B', 'KB', 'MB', 'GB'];
+      const i = Math.floor(Math.log(bytes) / Math.log(k));
+      return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+    }
+
+    function showUploadFeedback(type, title, message, badge) {
+      const fb = document.getElementById('upload-feedback');
+      if (!fb) return;
+      if (type === 'error') {
+        fb.className = 'mt-3 p-3.5 rounded-xl border border-rose-300 bg-rose-50 text-rose-900 flex items-start gap-3 text-xs shadow-xs';
+        fb.innerHTML = `
+          <div class="w-7 h-7 rounded-lg bg-rose-100 flex items-center justify-center shrink-0 text-rose-600">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+          </div>
+          <div class="flex-1 min-w-0">
+            <div class="font-bold text-rose-950">${title}</div>
+            <div class="text-rose-800 mt-0.5 leading-relaxed">${message}</div>
+          </div>
+          <button onclick="document.getElementById('upload-feedback').classList.add('hidden')" class="text-rose-500 hover:text-rose-800 font-bold p-1 cursor-pointer">&times;</button>
+        `;
+      } else {
+        fb.className = 'mt-3 p-3 rounded-xl border border-navy-200 bg-white text-navy-900 flex items-center justify-between text-xs shadow-xs';
+        fb.innerHTML = `
+          <div class="flex items-center gap-2.5 min-w-0">
+            <div class="w-7 h-7 rounded-lg bg-navy-100 flex items-center justify-center shrink-0 text-navy-700">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
+              </svg>
+            </div>
+            <div class="min-w-0 truncate">
+              <div class="font-bold text-navy-950 truncate">${title}</div>
+              <div class="text-[11px] text-navy-600 font-mono">${message}</div>
+            </div>
+          </div>
+          <span class="text-[10px] font-bold text-navy-800 uppercase tracking-wider bg-navy-100 px-2.5 py-1 rounded-full border border-navy-200 shrink-0">${badge || 'Analyzed'}</span>
+        `;
+      }
+      fb.classList.remove('hidden');
+    }
 
     // True 16-bit PCM WAV Encoder for in-browser audio recordings & WebM decoding
     async function convertBlobToWav(blob) {
@@ -1045,6 +1106,7 @@
         if (data.status === 'success' || data.status === 'irrelevant_audio') {
           // Deselect presets when user uploads custom audio
           document.querySelectorAll('.sample-btn').forEach(btn => btn.classList.remove('active-sample'));
+          showUploadFeedback('success', file.name, formatBytes(file.size), data.status === 'success' ? 'Validated' : 'Screened');
           renderAnalysis(data);
         } else {
           // Rejection due to invalid format or unreadable audio: hide prediction HUD and player
@@ -1052,14 +1114,14 @@
           const rejCard = document.getElementById('rejection-card');
           if (rejCard) rejCard.classList.add('hidden');
           document.getElementById('player-container').classList.add('hidden');
-          alert('Upload Filtered: ' + (data.message || 'Invalid audio file format.'));
+          showUploadFeedback('error', 'Audio Upload Filtered', data.message || 'Invalid audio file format. Please upload WAV, MP3, OGG, or FLAC.');
         }
       } catch (err) {
         showLoading(false);
         document.getElementById('results-container').classList.add('hidden');
         const rejCard = document.getElementById('rejection-card');
         if (rejCard) rejCard.classList.add('hidden');
-        alert('Upload failed: ' + err.message);
+        showUploadFeedback('error', 'Upload Error', 'Upload failed: ' + err.message);
       }
     }
 

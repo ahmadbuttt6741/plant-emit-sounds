@@ -15,7 +15,10 @@ EXCLUDE_DIRS = {
     '.venv',
     'venv',
     '.gemini',
-    '.vscode'
+    '.vscode',
+    'PlantSounds',
+    'plant_sounds',
+    'raw_audio'
 }
 
 EXCLUDE_EXTENSIONS = {
@@ -23,7 +26,8 @@ EXCLUDE_EXTENSIONS = {
     '.pyo',
     '.pyd',
     '.log',
-    '.zip'
+    '.zip',
+    '.npz'
 }
 
 # Directories/files to explicitly include

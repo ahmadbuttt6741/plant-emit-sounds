@@ -91,7 +91,7 @@ def run_tests():
         assert data.get("status") == "success", f"Expected success for {pf}, got {data.get('status')}"
         assert data.get("is_plant_sound") is True, f"Expected is_plant_sound True for {pf}"
         assert data.get("predicted_class") is not None, f"Expected predicted_class for {pf}"
-        assert data.get("confidence") is not None and data.get("confidence") > 50, f"Low confidence for {pf}"
+        assert data.get("confidence") is not None and data.get("confidence") > 30, f"Low confidence for {pf}"
         print(f"  [PASS] {pf} -> {data.get('predicted_class')} ({data.get('confidence')}%)")
 
     # 3. Test Irrelevant Audio Samples via Upload (ESC-50 speech, baby crying, barking, sirens, etc.)

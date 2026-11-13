@@ -13,7 +13,10 @@ phytoecho_vercel_deployment.zip
 demo/uploads/*
 !demo/uploads/.gitkeep
 demo/dataset/raw_audio
+demo/dataset/PlantSounds
+demo/dataset/plant_sounds
 *.docx
+*.npz
 test_*.py
 evaluate_model_performance.py
 create_vercel_zip.py
