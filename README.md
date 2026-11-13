@@ -119,3 +119,4 @@ When deploying to physical hardware in the greenhouse or field:
    - $1.65\text{ V}$ DC virtual ground bias network (two $100\text{ k}\Omega$ voltage dividers + $10\ \mu\text{F}$ bypass capacitor) to center AC audio waveforms within the ESP32 ADC $0 - 3.3\text{ V}$ safe range.
 3. **Edge Inference**:
    - ESP32 ADC timer-driven DMA sampling at 8 kHz – 22.05 kHz.
+# plant-emit-sounds
