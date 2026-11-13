@@ -1,0 +1,33 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "PhytoEcho: Run Flask App",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/demo/app.py",
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "env": {
+        "PYTHONUNBUFFERED": "1",
+        "FLASK_DEBUG": "1"
+      }
+    },
+    {
+      "name": "PhytoEcho: Run Tests (Relevance & Formats)",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/test_relevance_and_formats.py",
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal"
+    },
+    {
+      "name": "PhytoEcho: Verify Auth",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/demo/verify_auth.py",
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal"
+    }
+  ]
+}

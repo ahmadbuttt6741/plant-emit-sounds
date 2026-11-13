@@ -1,0 +1,878 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
+  <title>PhytoEcho — Plant Acoustic Health Monitor | Developed by Nanstack</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            navy: {
+              50: '#f0f5fa',
+              100: '#e1ecf7',
+              200: '#c5d8ed',
+              300: '#9bbfe0',
+              400: '#689ece',
+              500: '#3b7ebd',
+              600: '#2563a6',
+              700: '#1c4d85',
+              800: '#163963',
+              900: '#0f2440',
+              950: '#081424',
+            },
+            brand: {
+              50: '#ecfdf5',
+              100: '#d1fae5',
+              200: '#a7f3d0',
+              300: '#6ee7b7',
+              400: '#34d399',
+              500: '#10b981',
+              600: '#059669',
+              700: '#047857',
+              800: '#065f46',
+              900: '#064e3b',
+            },
+            nanstack: {
+              light: '#818cf8',
+              DEFAULT: '#6366f1',
+              dark: '#4f46e5'
+            }
+          },
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'system-ui', '-apple-system', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
+          },
+          boxShadow: {
+            'subtle': '0 2px 10px rgba(15, 36, 64, 0.04), 0 1px 3px rgba(15, 36, 64, 0.03)',
+            'card': '0 10px 30px -5px rgba(15, 36, 64, 0.06), 0 4px 10px -2px rgba(15, 36, 64, 0.03)',
+            'float': '0 20px 40px -15px rgba(28, 77, 133, 0.18)',
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
+
+  <style>
+    /* Custom light navy scrollbars */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #f0f5fa;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #c5d8ed;
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #9bbfe0;
+    }
+
+    @keyframes soundwaveAnim {
+      0%, 100% { height: 18%; opacity: 0.6; }
+      50% { height: 96%; opacity: 1; }
+    }
+    .wave-bar {
+      animation: soundwaveAnim 1.4s ease-in-out infinite;
+    }
+
+    @keyframes pulseGlow {
+      0%, 100% { opacity: 0.4; transform: scale(1); }
+      50% { opacity: 0.8; transform: scale(1.04); }
+    }
+    .ambient-glow {
+      animation: pulseGlow 8s ease-in-out infinite;
+    }
+  </style>
+</head>
+<body class="bg-gradient-to-b from-[#edf3fa] via-[#f5f8fc] to-[#e8f1fa] text-navy-900 min-h-screen flex flex-col font-sans selection:bg-navy-600 selection:text-white antialiased relative overflow-x-hidden">
+
+  <!-- Ambient Light Navy Background Accents -->
+  <div class="fixed inset-0 overflow-hidden pointer-events-none z-0">
+    <div class="ambient-glow absolute -top-40 -left-40 w-[36rem] h-[36rem] bg-gradient-to-br from-navy-200/60 via-sky-200/40 to-transparent rounded-full blur-3xl"></div>
+    <div class="ambient-glow absolute top-1/3 -right-40 w-[32rem] h-[32rem] bg-gradient-to-bl from-navy-100/50 via-blue-100/30 to-transparent rounded-full blur-3xl" style="animation-delay: 3s;"></div>
+    <div class="ambient-glow absolute -bottom-40 left-1/4 w-[38rem] h-[38rem] bg-gradient-to-tr from-navy-200/50 via-navy-100/40 to-transparent rounded-full blur-3xl" style="animation-delay: 5s;"></div>
+    <!-- Fine dot pattern overlay in light navy -->
+    <div class="absolute inset-0 bg-[radial-gradient(#c5d8ed_1.2px,transparent_1.2px)] [background-size:24px_24px] opacity-60"></div>
+  </div>
+
+  <!-- Top Navigation Bar (White & Light Navy Blue) -->
+  <header class="sticky top-0 z-50 bg-white/95 backdrop-blur-xl border-b border-navy-200/90 px-4 sm:px-8 py-3 transition-all shadow-xs">
+    <div class="max-w-7xl mx-auto flex items-center justify-between gap-4">
+      
+      <!-- Brand & Title -->
+      <div class="flex items-center space-x-3 min-w-0">
+        <div class="relative flex items-center justify-center w-10 h-10 rounded-2xl bg-gradient-to-tr from-navy-800 via-navy-700 to-navy-500 p-0.5 shadow-md shadow-navy-700/20 shrink-0">
+          <div class="w-full h-full bg-white rounded-[14px] flex items-center justify-center">
+            <svg class="w-5 h-5 text-navy-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 100-6 3 3 0 000 6z" />
+            </svg>
+          </div>
+          <span class="absolute -bottom-0.5 -right-0.5 flex h-2.5 w-2.5">
+            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-navy-400 opacity-75"></span>
+            <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-navy-600 border-2 border-white"></span>
+          </span>
+        </div>
+        <div class="min-w-0">
+          <div class="flex items-center gap-2">
+            <span class="font-extrabold text-lg sm:text-xl tracking-tight text-navy-950">PhytoEcho</span>
+          </div>
+          <p class="text-xs text-navy-600 font-medium hidden sm:block truncate">Plant Acoustic Health & Stress Diagnostics</p>
+        </div>
+      </div>
+
+      <!-- Center Status Badges (Desktop) -->
+      <div class="hidden md:flex items-center space-x-3 text-xs">
+        <div class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-navy-50/95 border border-navy-200/90 text-navy-800 font-medium shadow-xs">
+          <span class="w-2 h-2 rounded-full bg-navy-500 animate-pulse"></span>
+          <span class="font-semibold text-navy-950">88.6% Test Accuracy</span>
+          <span class="text-navy-300">•</span>
+          <span class="text-navy-700 font-medium">6,000 Sound Samples</span>
+        </div>
+        <div class="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-navy-100/80 border border-navy-200 text-navy-700 font-medium">
+          <svg class="w-3.5 h-3.5 text-navy-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+          </svg>
+          <span>Real-Time Plant Listening</span>
+        </div>
+      </div>
+
+      <!-- Developed by Nanstack Badge with Logo & Direct Link -->
+      <div class="flex items-center gap-2 shrink-0">
+        <a href="https://nanstack.tech" target="_blank" rel="noopener noreferrer" 
+           title="Visit Nanstack Website"
+           class="group relative flex items-center gap-2.5 px-3 py-1.5 rounded-xl bg-white border border-navy-200 hover:border-navy-400 hover:shadow-md transition-all shadow-xs cursor-pointer">
+          <div class="w-7 h-7 rounded-lg bg-navy-50 p-0.5 flex items-center justify-center overflow-hidden shrink-0 border border-navy-200 shadow-2xs">
+            <img src="/static/images/nanstack_logo.jpg" alt="Nanstack Logo" class="w-full h-full object-contain">
+          </div>
+          <div class="text-left">
+            <div class="text-[9px] uppercase tracking-wider text-navy-500 font-medium">Developed by</div>
+            <div class="text-xs font-bold text-navy-900 group-hover:text-navy-700 tracking-tight flex items-center gap-1 font-mono transition-colors">
+              <span>nanstack.tech</span>
+              <svg class="w-3 h-3 text-navy-600 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+              </svg>
+            </div>
+          </div>
+        </a>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- Main Content Area: Responsive Two-Column SaaS Layout (White & Light Navy) -->
+  <main class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 flex-1 w-full flex items-center">
+    
+    <div class="w-full grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
+      
+      <!-- ========================================== -->
+      <!-- LEFT COLUMN: Humanized Introduction        -->
+      <!-- ========================================== -->
+      <div class="lg:col-span-7 space-y-6 sm:space-y-7">
+        
+        <!-- Friendly Pill Badge -->
+        <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-navy-100 border border-navy-200 text-xs text-navy-800 font-medium shadow-xs">
+          <span class="text-sm">🌿</span>
+          <span class="font-bold text-navy-900">Plant Acoustic Care</span>
+          <span class="text-navy-300">•</span>
+          <span>Early Natural Stress Warning</span>
+        </div>
+
+        <!-- Attractive Humanized Welcome Heading -->
+        <div class="space-y-3.5">
+          <h1 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-navy-950 leading-[1.15]">
+            Listen to What Your Plants <span class="bg-gradient-to-r from-navy-800 via-navy-600 to-sky-600 bg-clip-text text-transparent">Need</span> Before It's Too Late.
+          </h1>
+          <p class="text-navy-700 text-base sm:text-lg leading-relaxed max-w-2xl font-normal">
+            Plants make tiny sound vibrations when they are thirsty, overheated, or under pest attack. PhytoEcho listens to these natural stem sounds so you can give them the right care days before leaves begin to wilt or turn yellow.
+          </p>
+        </div>
+
+        <!-- Interactive Live Plant Sound Simulation Card -->
+        <div class="bg-white/95 backdrop-blur-md rounded-2xl p-5 border border-navy-200 shadow-card relative overflow-hidden group">
+          <div class="flex items-center justify-between pb-3 border-b border-navy-100 text-xs text-navy-600 font-medium">
+            <div class="flex items-center gap-2">
+              <span class="w-2.5 h-2.5 rounded-full bg-navy-600 animate-pulse"></span>
+              <span class="text-navy-950 font-bold">Listening to Stem Micro-Vibrations</span>
+            </div>
+            
+            <!-- Interactive Sound Pulse Preview Button -->
+            <button onclick="playStemAudioSimulation()" 
+                    id="stem-sound-demo-btn"
+                    title="Click to hear a synthetic sample of plant stem cavitation pulses"
+                    class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-navy-100 hover:bg-navy-200 text-navy-800 border border-navy-300 font-semibold transition-all hover:scale-102 cursor-pointer shadow-2xs">
+              <svg class="w-3.5 h-3.5 text-navy-700" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M8 5v14l11-7z"/>
+              </svg>
+              <span>Simulate Stem Sound</span>
+            </button>
+          </div>
+
+          <!-- Gentle Frequency Wave Simulation in Light Navy & Blue -->
+          <div class="py-4 flex items-center justify-between gap-1 sm:gap-1.5 h-20 px-2 bg-navy-50/70 rounded-xl my-2 border border-navy-100/90">
+            <div class="wave-bar w-1.5 sm:w-2 bg-gradient-to-t from-navy-800 to-sky-400 rounded-full" style="animation-delay: 0.1s; height: 35%;"></div>
+            <div class="wave-bar w-1.5 sm:w-2 bg-gradient-to-t from-navy-800 to-sky-400 rounded-full" style="animation-delay: 0.3s; height: 65%;"></div>
+            <div class="wave-bar w-1.5 sm:w-2 bg-gradient-to-t from-navy-800 to-sky-400 rounded-full" style="animation-delay: 0.2s; height: 85%;"></div>
+            <div class="wave-bar w-1.5 sm:w-2 bg-gradient-to-t from-navy-700 to-sky-300 rounded-full" style="animation-delay: 0.4s; height: 45%;"></div>
+            <div class="wave-bar w-1.5 sm:w-2 bg-gradient-to-t from-navy-700 to-sky-300 rounded-full" style="animation-delay: 0.6s; height: 95%;"></div>
+            <div class="wave-bar w-1.5 sm:w-2 bg-gradient-to-t from-navy-600 to-sky-400 rounded-full" style="animation-delay: 0.15s; height: 60%;"></div>
+            <div class="wave-bar w-1.5 sm:w-2 bg-gradient-to-t from-navy-600 to-sky-400 rounded-full" style="animation-delay: 0.5s; height: 40%;"></div>
+            <div class="wave-bar w-1.5 sm:w-2 bg-gradient-to-t from-navy-800 to-sky-400 rounded-full" style="animation-delay: 0.25s; height: 75%;"></div>
+            <div class="wave-bar w-1.5 sm:w-2 bg-gradient-to-t from-navy-800 to-sky-400 rounded-full" style="animation-delay: 0.45s; height: 90%;"></div>
+            <div class="wave-bar w-1.5 sm:w-2 bg-gradient-to-t from-navy-700 to-sky-400 rounded-full" style="animation-delay: 0.35s; height: 50%;"></div>
+            <div class="wave-bar w-1.5 sm:w-2 bg-gradient-to-t from-navy-700 to-sky-300 rounded-full" style="animation-delay: 0.55s; height: 80%;"></div>
+            <div class="wave-bar w-1.5 sm:w-2 bg-gradient-to-t from-navy-600 to-sky-400 rounded-full" style="animation-delay: 0.65s; height: 35%;"></div>
+            <div class="wave-bar w-1.5 sm:w-2 bg-gradient-to-t from-navy-800 to-sky-400 rounded-full" style="animation-delay: 0.7s; height: 70%;"></div>
+            <div class="wave-bar w-1.5 sm:w-2 bg-gradient-to-t from-navy-800 to-sky-400 rounded-full" style="animation-delay: 0.12s; height: 55%;"></div>
+            <div class="wave-bar w-1.5 sm:w-2 bg-gradient-to-t from-navy-700 to-sky-300 rounded-full" style="animation-delay: 0.38s; height: 90%;"></div>
+            <div class="wave-bar w-1.5 sm:w-2 bg-gradient-to-t from-navy-700 to-sky-300 rounded-full" style="animation-delay: 0.22s; height: 60%;"></div>
+            <div class="wave-bar w-1.5 sm:w-2 bg-gradient-to-t from-navy-600 to-sky-400 rounded-full" style="animation-delay: 0.48s; height: 40%;"></div>
+            <div class="wave-bar w-1.5 sm:w-2 bg-gradient-to-t from-navy-800 to-sky-400 rounded-full" style="animation-delay: 0.52s; height: 85%;"></div>
+          </div>
+
+          <div class="flex items-center justify-between text-xs text-navy-600 pt-2 border-t border-navy-100">
+            <span class="flex items-center gap-1.5 font-medium text-navy-800">
+              <span class="w-2 h-2 rounded-full bg-navy-600"></span>
+              Live Stem Monitoring
+            </span>
+            <span class="text-navy-600 hidden xs:inline">Non-Invasive Sensor Clamp</span>
+            <span class="text-navy-800 font-semibold">Immediate Insights</span>
+          </div>
+        </div>
+
+        <!-- 4 Humanized Feature Cards (White & Light Navy) -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+          
+          <!-- Feature 1: Thirst Alerts -->
+          <div class="bg-white rounded-2xl p-4 border border-navy-200 hover:border-navy-400 hover:bg-navy-50/40 hover:shadow-card hover:-translate-y-0.5 transition-all group">
+            <div class="w-10 h-10 rounded-xl bg-amber-50 border border-amber-200/80 flex items-center justify-center text-amber-600 mb-3 group-hover:scale-108 transition-transform">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
+              </svg>
+            </div>
+            <h3 class="text-sm font-bold text-navy-950 mb-1 group-hover:text-navy-700 transition-colors">Early Thirst & Drought Alerts</h3>
+            <p class="text-xs text-navy-700 leading-relaxed">
+              Detects when plants are running low on water days before leaves begin to curl or droop.
+            </p>
+          </div>
+
+          <!-- Feature 2: Heat Stress -->
+          <div class="bg-white rounded-2xl p-4 border border-navy-200 hover:border-navy-400 hover:bg-navy-50/40 hover:shadow-card hover:-translate-y-0.5 transition-all group">
+            <div class="w-10 h-10 rounded-xl bg-orange-50 border border-orange-200/80 flex items-center justify-center text-orange-600 mb-3 group-hover:scale-108 transition-transform">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+              </svg>
+            </div>
+            <h3 class="text-sm font-bold text-navy-950 mb-1 group-hover:text-navy-700 transition-colors">Heat Stress Warning</h3>
+            <p class="text-xs text-navy-700 leading-relaxed">
+              Catches thermal distress on scorching days so you can provide shade and cooling in time.
+            </p>
+          </div>
+
+          <!-- Feature 3: Pest Detection -->
+          <div class="bg-white rounded-2xl p-4 border border-navy-200 hover:border-navy-400 hover:bg-navy-50/40 hover:shadow-card hover:-translate-y-0.5 transition-all group">
+            <div class="w-10 h-10 rounded-xl bg-rose-50 border border-rose-200/80 flex items-center justify-center text-rose-600 mb-3 group-hover:scale-108 transition-transform">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+              </svg>
+            </div>
+            <h3 class="text-sm font-bold text-navy-950 mb-1 group-hover:text-navy-700 transition-colors">Early Pest Detection</h3>
+            <p class="text-xs text-navy-700 leading-relaxed">
+              Hears tiny chewing vibrations from caterpillars and stem borers before damage spreads.
+            </p>
+          </div>
+
+          <!-- Feature 4: Practical Care Advice -->
+          <div class="bg-white rounded-2xl p-4 border border-navy-200 hover:border-navy-400 hover:bg-navy-50/40 hover:shadow-card hover:-translate-y-0.5 transition-all group">
+            <div class="w-10 h-10 rounded-xl bg-navy-100 border border-navy-200 flex items-center justify-center text-navy-700 mb-3 group-hover:scale-108 transition-transform">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+              </svg>
+            </div>
+            <h3 class="text-sm font-bold text-navy-950 mb-1 group-hover:text-navy-700 transition-colors">Clear Care Actions</h3>
+            <p class="text-xs text-navy-700 leading-relaxed">
+              Provides simple watering amounts, shading tips, and plant health recovery steps.
+            </p>
+          </div>
+
+        </div>
+
+        <!-- Clean Summary Stats Strip -->
+        <div class="p-4 sm:p-5 rounded-2xl bg-white border border-navy-200 shadow-card grid grid-cols-3 gap-2 sm:gap-4 text-center">
+          <div class="space-y-0.5">
+            <div class="text-2xl sm:text-3xl font-extrabold text-navy-900 font-mono tracking-tight">88.6%</div>
+            <div class="text-[11px] text-navy-600 uppercase tracking-wider font-semibold">Test Accuracy</div>
+          </div>
+          <div class="border-x border-navy-200 space-y-0.5">
+            <div class="text-2xl sm:text-3xl font-extrabold text-navy-950 font-mono tracking-tight">6,000</div>
+            <div class="text-[11px] text-navy-600 uppercase tracking-wider font-semibold">Sound Samples</div>
+          </div>
+          <div class="space-y-0.5">
+            <div class="text-2xl sm:text-3xl font-extrabold text-navy-700 font-mono tracking-tight">&lt; 0.2s</div>
+            <div class="text-[11px] text-navy-600 uppercase tracking-wider font-semibold">Real-Time Check</div>
+          </div>
+        </div>
+
+      </div>
+
+
+      <!-- ========================================== -->
+      <!-- RIGHT COLUMN: Clean Login Card             -->
+      <!-- ========================================== -->
+      <div class="lg:col-span-5 w-full">
+        
+        <div class="bg-white/95 backdrop-blur-xl rounded-3xl p-6 sm:p-8 border border-navy-200 shadow-card relative">
+          
+          <!-- Card Header -->
+          <div class="mb-6 space-y-1.5">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-xs font-bold uppercase tracking-wider text-navy-800 bg-navy-100 px-3 py-1 rounded-full border border-navy-200">Researcher Portal</span>
+              <div class="flex items-center gap-1.5 text-xs text-navy-600">
+                <span class="w-2 h-2 rounded-full bg-navy-600 animate-pulse"></span>
+                <span class="font-medium">System Ready</span>
+              </div>
+            </div>
+            <h2 id="panel-title" class="text-2xl sm:text-3xl font-extrabold text-navy-950 tracking-tight">Welcome Back</h2>
+            <p id="panel-subtitle" class="text-xs sm:text-sm text-navy-600">
+              Sign in to access your plant health diagnostics and stem sound recordings.
+            </p>
+          </div>
+
+          <!-- Alert Box -->
+          <div id="auth-alert" class="hidden mb-5 p-3.5 rounded-xl border text-xs leading-relaxed flex items-start gap-2.5 transition-all">
+            <svg id="auth-alert-icon" class="w-4 h-4 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <div id="auth-alert-text" class="flex-1 font-medium"></div>
+          </div>
+
+          <!-- ========================================== -->
+          <!-- 1. LOGIN FORM                              -->
+          <!-- ========================================== -->
+          <form id="login-form" onsubmit="handleLogin(event)" class="space-y-4">
+            
+            <!-- Email or Username Input -->
+            <div class="space-y-1.5">
+              <label for="identifier" class="block text-xs font-semibold text-navy-800">Username or Email</label>
+              <div class="relative">
+                <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-navy-400">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.206" />
+                  </svg>
+                </div>
+                <input 
+                  type="text" 
+                  id="identifier" 
+                  name="identifier" 
+                  required 
+                  autocomplete="username"
+                  placeholder="botany" 
+                  value="botany"
+                  class="w-full pl-10 pr-4 py-2.5 bg-navy-50/60 border border-navy-200 rounded-xl text-sm text-navy-950 placeholder-navy-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-navy-400/30 focus:border-navy-600 transition-all font-mono">
+              </div>
+            </div>
+
+            <!-- Password Input with Show/Hide Toggle -->
+            <div class="space-y-1.5">
+              <div class="flex items-center justify-between">
+                <label for="password" class="block text-xs font-semibold text-navy-800">Password</label>
+                <button type="button" onclick="switchToForgotPassword()" class="text-xs text-navy-700 hover:text-navy-950 hover:underline transition-colors font-medium cursor-pointer">
+                  Forgot password?
+                </button>
+              </div>
+              <div class="relative">
+                <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-navy-400">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                  </svg>
+                </div>
+                <input 
+                  type="password" 
+                  id="password" 
+                  name="password" 
+                  required 
+                  autocomplete="current-password"
+                  placeholder="••••••••••••" 
+                  value="nanstack"
+                  class="w-full pl-10 pr-11 py-2.5 bg-navy-50/60 border border-navy-200 rounded-xl text-sm text-navy-950 placeholder-navy-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-navy-400/30 focus:border-navy-600 transition-all font-mono">
+                
+                <!-- Show / Hide Password Button -->
+                <button 
+                  type="button" 
+                  onclick="togglePasswordVisibility('password', 'eye-icon-login')" 
+                  title="Toggle password visibility"
+                  class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-navy-400 hover:text-navy-700 transition-colors focus:outline-none cursor-pointer">
+                  <svg id="eye-icon-login" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            <!-- Remember Me -->
+            <div class="flex items-center justify-between py-1">
+              <label class="flex items-center space-x-2 cursor-pointer select-none text-xs text-navy-700">
+                <input type="checkbox" id="remember_me" name="remember_me" checked class="w-4 h-4 rounded border-navy-300 text-navy-700 focus:ring-navy-500/30">
+                <span>Remember me for 30 days</span>
+              </label>
+            </div>
+
+            <!-- Submit Login Button -->
+            <button 
+              type="submit" 
+              id="login-btn"
+              class="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-navy-800 via-navy-700 to-navy-600 hover:from-navy-900 hover:to-navy-700 text-white font-bold text-sm tracking-wide shadow-md shadow-navy-700/25 hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0 transition-all flex items-center justify-center gap-2 cursor-pointer">
+              <span id="login-btn-text">Sign In to Dashboard</span>
+              <svg id="login-btn-spinner" class="hidden animate-spin w-4 h-4 text-white" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+              </svg>
+            </button>
+
+          </form>
+
+
+          <!-- ========================================== -->
+          <!-- 2. FORGOT PASSWORD WORKFLOW                -->
+          <!-- ========================================== -->
+          <div id="forgot-password-panel" class="hidden space-y-4">
+            
+            <div class="p-3 bg-navy-50 border border-navy-200 rounded-xl text-xs text-navy-800">
+              Enter your registered email address to receive a 6-digit verification code.
+            </div>
+
+            <div id="step-request-code" class="space-y-3">
+              <div class="space-y-1.5">
+                <label for="reset_email" class="block text-xs font-semibold text-navy-800">Account Email</label>
+                <input 
+                  type="email" 
+                  id="reset_email" 
+                  placeholder="botany@nanstack.tech" 
+                  value="botany@nanstack.tech"
+                  class="w-full px-3.5 py-2.5 bg-navy-50/60 border border-navy-200 rounded-xl text-sm text-navy-950 placeholder-navy-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-navy-400/30 font-mono">
+              </div>
+
+              <button 
+                type="button" 
+                onclick="sendResetCode()" 
+                id="send-code-btn"
+                class="w-full py-2.5 px-4 rounded-xl bg-navy-100 hover:bg-navy-200 border border-navy-200 text-navy-900 font-semibold text-xs tracking-wide transition-all cursor-pointer">
+                Generate Verification Code
+              </button>
+            </div>
+
+            <!-- Step 2: Enter code and new password -->
+            <div id="step-verify-code" class="hidden space-y-3 pt-2 border-t border-navy-100">
+              <div class="space-y-1.5">
+                <label for="reset_code" class="block text-xs font-semibold text-navy-800">6-Digit Verification Code</label>
+                <input 
+                  type="text" 
+                  id="reset_code" 
+                  maxlength="6"
+                  placeholder="e.g. 123456" 
+                  class="w-full px-3.5 py-2 bg-navy-50/60 border border-navy-200 rounded-xl text-sm text-navy-950 text-center font-mono tracking-widest focus:bg-white focus:ring-2 focus:ring-navy-400/30">
+              </div>
+
+              <div class="space-y-1.5">
+                <label for="new_password" class="block text-xs font-semibold text-navy-800">New Password</label>
+                <div class="relative">
+                  <input 
+                    type="password" 
+                    id="new_password" 
+                    placeholder="At least 6 characters" 
+                    class="w-full px-3.5 py-2 bg-navy-50/60 border border-navy-200 rounded-xl text-sm text-navy-950 focus:bg-white focus:ring-2 focus:ring-navy-400/30 font-mono">
+                  <button 
+                    type="button" 
+                    onclick="togglePasswordVisibility('new_password', 'eye-icon-reset')" 
+                    class="absolute inset-y-0 right-0 pr-3 flex items-center text-navy-400 hover:text-navy-700 cursor-pointer">
+                    <svg id="eye-icon-reset" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+
+              <button 
+                type="button" 
+                onclick="submitNewPassword()" 
+                id="reset-submit-btn"
+                class="w-full py-2.5 px-4 rounded-xl bg-navy-700 hover:bg-navy-600 text-white font-bold text-xs tracking-wide shadow-sm transition-all cursor-pointer">
+                Update Password & Sign In
+              </button>
+            </div>
+
+            <!-- Back to Login Button -->
+            <button 
+              type="button" 
+              onclick="switchToLogin()" 
+              class="w-full text-center text-xs text-navy-600 hover:text-navy-950 transition-colors pt-2 flex items-center justify-center gap-1.5 cursor-pointer">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+              </svg>
+              <span>Back to Sign In</span>
+            </button>
+
+          </div>
+
+
+          <!-- ========================================== -->
+          <!-- QUICK 1-CLICK DEMO CREDENTIALS HELPER      -->
+          <!-- ========================================== -->
+          <div class="mt-6 pt-5 border-t border-navy-200">
+            <div class="flex items-center justify-between text-xs text-navy-600 mb-2">
+              <span class="font-semibold text-navy-800">Quick Test Credentials:</span>
+              <span class="text-[11px] text-navy-800 font-bold bg-navy-100 px-2 py-0.5 rounded-full border border-navy-200">1-Click Auto Fill</span>
+            </div>
+            
+            <div class="grid grid-cols-2 gap-2 text-xs">
+              <button 
+                type="button" 
+                onclick="fillCredentials('botany', 'nanstack')"
+                class="p-2.5 rounded-xl bg-navy-50/80 border border-navy-200 hover:border-navy-400 hover:bg-navy-100/70 transition-all text-left group cursor-pointer">
+                <div class="font-bold text-navy-950 group-hover:text-navy-700 transition-colors flex items-center justify-between">
+                  <span>User / Admin</span>
+                  <span class="text-[10px] px-1.5 py-0.2 rounded bg-navy-200 text-navy-900 font-mono">botany</span>
+                </div>
+                <div class="text-[10px] text-navy-600 font-mono truncate">pass: nanstack</div>
+              </button>
+
+              <button 
+                type="button" 
+                onclick="fillCredentials('admin', 'nanstack')"
+                class="p-2.5 rounded-xl bg-navy-50/80 border border-navy-200 hover:border-navy-400 hover:bg-navy-100/70 transition-all text-left group cursor-pointer">
+                <div class="font-bold text-navy-950 group-hover:text-navy-700 transition-colors flex items-center justify-between">
+                  <span>Admin Alt</span>
+                  <span class="text-[10px] px-1.5 py-0.2 rounded bg-navy-200 text-navy-900 font-mono">admin</span>
+                </div>
+                <div class="text-[10px] text-navy-600 font-mono truncate">pass: nanstack</div>
+              </button>
+            </div>
+
+            <!-- Instant 1-Click Direct Demo Login button -->
+            <button 
+              type="button" 
+              onclick="directDemoLogin()"
+              class="w-full mt-3 py-2.5 px-3 rounded-xl bg-navy-100 hover:bg-navy-200 border border-navy-300 text-navy-800 font-bold text-xs flex items-center justify-center gap-2 transition-all cursor-pointer">
+              <svg class="w-3.5 h-3.5 text-navy-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+              </svg>
+              <span>Instant 1-Click Demo Login</span>
+            </button>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- Clean Light-Mode Footer with "Developed by Nanstack" (White & Light Navy) -->
+  <footer class="relative z-10 border-t border-navy-200 bg-white/95 backdrop-blur-md px-4 sm:px-8 py-6 text-navy-600">
+    <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+      
+      <!-- Brand & Description -->
+      <a href="https://nanstack.tech" target="_blank" rel="noopener noreferrer" class="flex items-center space-x-3 text-center md:text-left group cursor-pointer">
+        <div class="w-9 h-9 rounded-xl bg-white p-1 flex items-center justify-center overflow-hidden shrink-0 shadow-xs border border-navy-200 group-hover:scale-105 transition-transform">
+          <img src="/static/images/nanstack_logo.jpg" alt="Nanstack Logo" class="w-full h-full object-contain">
+        </div>
+        <div>
+          <div class="text-xs font-semibold text-navy-950 group-hover:text-navy-700 transition-colors">
+            PhytoEcho — Plant Acoustic Health Monitor
+          </div>
+          <div class="text-[11px] text-navy-600">
+            Acoustic Stem Vibrations & Early Stress Diagnostics
+          </div>
+        </div>
+      </a>
+
+      <!-- Center Nanstack Official Link -->
+      <div class="text-center font-mono text-xs">
+        <a href="https://nanstack.tech" target="_blank" rel="noopener noreferrer" 
+           class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-navy-50 border border-navy-200 hover:border-navy-400 text-navy-800 hover:text-navy-950 transition-all shadow-2xs">
+          <span>Developed by Nanstack</span>
+          <span class="text-navy-400">•</span>
+          <span class="text-navy-900 font-semibold">nanstack.tech</span>
+          <svg class="w-3 h-3 text-navy-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+          </svg>
+        </a>
+      </div>
+
+      <!-- System Status -->
+      <div class="flex items-center space-x-2 text-xs text-navy-600">
+        <span class="w-2 h-2 rounded-full bg-navy-600"></span>
+        <span class="font-medium text-navy-700">Sensor Network Ready</span>
+      </div>
+
+    </div>
+  </footer>
+
+  <!-- Script for Authentication, Form Handling & UI Switches -->
+  <script>
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.has('logged_out')) {
+      showAlert('You have been successfully signed out.', 'success');
+    } else if (urlParams.has('unauthorized')) {
+      showAlert('Please sign in to access your plant health dashboard.', 'warning');
+    }
+
+    function showAlert(message, type = 'error') {
+      const alertBox = document.getElementById('auth-alert');
+      const alertText = document.getElementById('auth-alert-text');
+      const alertIcon = document.getElementById('auth-alert-icon');
+      
+      alertBox.className = 'mb-5 p-3.5 rounded-xl border text-xs leading-relaxed flex items-start gap-2.5 transition-all ';
+      
+      if (type === 'error') {
+        alertBox.classList.add('bg-rose-50', 'border-rose-200', 'text-rose-700');
+        alertIcon.className = 'w-4 h-4 shrink-0 mt-0.5 text-rose-500';
+      } else if (type === 'success') {
+        alertBox.classList.add('bg-navy-50', 'border-navy-300', 'text-navy-900');
+        alertIcon.className = 'w-4 h-4 shrink-0 mt-0.5 text-navy-700';
+      } else if (type === 'warning') {
+        alertBox.classList.add('bg-amber-50', 'border-amber-200', 'text-amber-800');
+        alertIcon.className = 'w-4 h-4 shrink-0 mt-0.5 text-amber-600';
+      }
+
+      alertText.textContent = message;
+      alertBox.classList.remove('hidden');
+    }
+
+    function hideAlert() {
+      document.getElementById('auth-alert').classList.add('hidden');
+    }
+
+    function togglePasswordVisibility(inputId, iconId) {
+      const input = document.getElementById(inputId);
+      const icon = document.getElementById(iconId);
+      if (input.type === 'password') {
+        input.type = 'text';
+        icon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18" />';
+      } else {
+        input.type = 'password';
+        icon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />';
+      }
+    }
+
+    function fillCredentials(id, pass) {
+      document.getElementById('identifier').value = id;
+      document.getElementById('password').value = pass;
+      hideAlert();
+    }
+
+    async function handleLogin(e) {
+      e.preventDefault();
+      hideAlert();
+
+      const id = document.getElementById('identifier').value.trim();
+      const pass = document.getElementById('password').value;
+      const remember = document.getElementById('remember_me').checked;
+      const btn = document.getElementById('login-btn');
+      const btnText = document.getElementById('login-btn-text');
+      const spinner = document.getElementById('login-btn-spinner');
+
+      if (!id || !pass) {
+        showAlert('Please enter both username and password.', 'error');
+        return;
+      }
+
+      btn.disabled = true;
+      btnText.textContent = 'Signing In...';
+      spinner.classList.remove('hidden');
+
+      try {
+        const response = await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ identifier: id, password: pass, remember_me: remember })
+        });
+
+        const data = await response.json();
+
+        if (response.ok && data.status === 'success') {
+          btnText.textContent = 'Welcome! Opening Dashboard...';
+          showAlert('Authenticated successfully. Opening dashboard...', 'success');
+          
+          const nextUrl = urlParams.get('next') || data.redirect || '/dashboard';
+          setTimeout(() => {
+            window.location.href = nextUrl;
+          }, 400);
+        } else {
+          showAlert(data.message || 'Incorrect username or password. Please try again.', 'error');
+          btn.disabled = false;
+          btnText.textContent = 'Sign In to Dashboard';
+          spinner.classList.add('hidden');
+        }
+      } catch (err) {
+        showAlert('Network error while connecting to server. Please try again.', 'error');
+        btn.disabled = false;
+        btnText.textContent = 'Sign In to Dashboard';
+        spinner.classList.add('hidden');
+      }
+    }
+
+    async function directDemoLogin() {
+      fillCredentials('botany', 'nanstack');
+      document.getElementById('login-form').dispatchEvent(new Event('submit', { cancelable: true }));
+    }
+
+    function switchToForgotPassword() {
+      hideAlert();
+      document.getElementById('login-form').classList.add('hidden');
+      document.getElementById('forgot-password-panel').classList.remove('hidden');
+      document.getElementById('panel-title').textContent = 'Reset Password';
+      document.getElementById('panel-subtitle').textContent = 'Enter your email to receive a recovery code.';
+    }
+
+    function switchToLogin() {
+      hideAlert();
+      document.getElementById('forgot-password-panel').classList.add('hidden');
+      document.getElementById('login-form').classList.remove('hidden');
+      document.getElementById('panel-title').textContent = 'Welcome Back';
+      document.getElementById('panel-subtitle').textContent = 'Sign in to access your plant health diagnostics and stem sound recordings.';
+    }
+
+    async function sendResetCode() {
+      const email = document.getElementById('reset_email').value.trim();
+      if (!email) {
+        showAlert('Please enter your account email address.', 'error');
+        return;
+      }
+
+      const btn = document.getElementById('send-code-btn');
+      btn.disabled = true;
+      btn.textContent = 'Generating Verification Code...';
+
+      try {
+        const resp = await fetch('/api/auth/forgot-password', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: email })
+        });
+        const res = await resp.json();
+
+        if (resp.ok && res.status === 'success') {
+          showAlert(`Verification code generated: ${res.code} (Code valid for 30 minutes)`, 'success');
+          document.getElementById('step-verify-code').classList.remove('hidden');
+          document.getElementById('reset_code').value = res.code;
+        } else {
+          showAlert(res.message || 'Failed to generate code.', 'error');
+        }
+      } catch (e) {
+        showAlert('Network error occurred.', 'error');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Generate Verification Code';
+      }
+    }
+
+    async function submitNewPassword() {
+      const email = document.getElementById('reset_email').value.trim();
+      const code = document.getElementById('reset_code').value.trim();
+      const newPass = document.getElementById('new_password').value;
+
+      if (!code || !newPass) {
+        showAlert('Please enter both the verification code and new password.', 'error');
+        return;
+      }
+
+      if (newPass.length < 6) {
+        showAlert('Password must be at least 6 characters long.', 'error');
+        return;
+      }
+
+      const btn = document.getElementById('reset-submit-btn');
+      btn.disabled = true;
+      btn.textContent = 'Updating Password...';
+
+      try {
+        const resp = await fetch('/api/auth/reset-password', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, code, new_password: newPass })
+        });
+        const res = await resp.json();
+
+        if (resp.ok && res.status === 'success') {
+          showAlert('Password updated successfully! Please sign in with your new password.', 'success');
+          document.getElementById('password').value = newPass;
+          setTimeout(() => {
+            switchToLogin();
+          }, 1200);
+        } else {
+          showAlert(res.message || 'Reset failed.', 'error');
+        }
+      } catch (e) {
+        showAlert('Network error occurred.', 'error');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Update Password & Sign In';
+      }
+    }
+
+    // Web Audio Synthesizer: Play Simulated Plant Stem Acoustic Clicks
+    let audioCtx = null;
+    function playStemAudioSimulation() {
+      try {
+        if (!audioCtx) {
+          audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        if (audioCtx.state === 'suspended') {
+          audioCtx.resume();
+        }
+
+        const btn = document.getElementById('stem-sound-demo-btn');
+        btn.innerHTML = '<span class="w-2 h-2 rounded-full bg-navy-600 animate-ping"></span><span>Playing Clicks...</span>';
+        
+        // Schedule 5 quick cavitation clicks with natural decay
+        const now = audioCtx.currentTime;
+        const clickTimes = [0.05, 0.32, 0.74, 1.15, 1.58];
+
+        clickTimes.forEach((offset, idx) => {
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          
+          osc.type = 'triangle';
+          // Stem cavitation pulses have rapid resonant peaks ~3200-4800 Hz
+          osc.frequency.setValueAtTime(3200 + (idx * 240), now + offset);
+          osc.frequency.exponentialRampToValueAtTime(800, now + offset + 0.04);
+
+          gain.gain.setValueAtTime(0.001, now + offset);
+          gain.gain.linearRampToValueAtTime(0.25, now + offset + 0.005);
+          gain.gain.exponentialRampToValueAtTime(0.0001, now + offset + 0.06);
+
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+
+          osc.start(now + offset);
+          osc.stop(now + offset + 0.07);
+        });
+
+        setTimeout(() => {
+          btn.innerHTML = '<svg class="w-3.5 h-3.5 text-navy-700" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg><span>Simulate Stem Sound</span>';
+        }, 1800);
+
+      } catch (e) {
+        console.warn('Audio demo simulation not supported:', e);
+      }
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,99 @@
+{
+  "accuracy": 88.6,
+  "accuracy_std": 0.58,
+  "total_samples": 6000,
+  "classes": [
+    "Healthy Baseline",
+    "Drought Stress (Cavitation)",
+    "Heat Stress (Burst & Quenched)",
+    "Pest Attack (Chewing Vibration)",
+    "Physical Damage (Shock Spike)"
+  ],
+  "class_keys": [
+    "healthy",
+    "drought",
+    "heat",
+    "pest",
+    "attack"
+  ],
+  "confusion_matrix": [
+    [
+      1092,
+      24,
+      18,
+      48,
+      18
+    ],
+    [
+      30,
+      1044,
+      86,
+      24,
+      16
+    ],
+    [
+      34,
+      92,
+      1026,
+      26,
+      22
+    ],
+    [
+      52,
+      28,
+      22,
+      1068,
+      30
+    ],
+    [
+      26,
+      22,
+      32,
+      34,
+      1086
+    ]
+  ],
+  "top_features": [
+    {
+      "feature": "crest_factor",
+      "importance": 10.37
+    },
+    {
+      "feature": "clicks_per_sec",
+      "importance": 9.09
+    },
+    {
+      "feature": "ici_mean",
+      "importance": 7.79
+    },
+    {
+      "feature": "energy_high_6500hz",
+      "importance": 7.62
+    },
+    {
+      "feature": "click_count",
+      "importance": 7.18
+    },
+    {
+      "feature": "waveform_kurtosis",
+      "importance": 6.75
+    },
+    {
+      "feature": "frame_energy_variance",
+      "importance": 6.31
+    },
+    {
+      "feature": "waveform_skewness",
+      "importance": 5.54
+    }
+  ],
+  "folds": 5,
+  "cv_scores": [
+    88.2,
+    89.1,
+    87.8,
+    89.4,
+    88.5
+  ],
+  "training_sources": "ESC-50 Real Acoustics + Plant Hydraulic Bio-Physical Models"
+}

@@ -1,0 +1,25 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Distribution / packaging / local archives
+*.zip
+phytoecho_vercel_deployment.zip
+
+# Virtual Environments
+venv/
+.venv/
+env/
+ENV/
+
+# Temporary uploaded files
+demo/uploads/*
+!demo/uploads/.gitkeep
+
+# Vercel project state
+.vercel/
+
+# OS metadata
+.DS_Store
+Thumbs.db

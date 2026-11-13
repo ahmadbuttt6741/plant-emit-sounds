@@ -1,0 +1,1583 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
+  <title>PhytoEcho — Plant Acoustic Health Monitor | Developed by Nanstack</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            navy: {
+              50: '#f0f5fa',
+              100: '#e1ecf7',
+              200: '#c5d8ed',
+              300: '#9bbfe0',
+              400: '#689ece',
+              500: '#3b7ebd',
+              600: '#2563a6',
+              700: '#1c4d85',
+              800: '#163963',
+              900: '#0f2440',
+              950: '#081424',
+            },
+            brand: {
+              50: '#ecfdf5',
+              100: '#d1fae5',
+              200: '#a7f3d0',
+              300: '#6ee7b7',
+              400: '#34d399',
+              500: '#10b981',
+              600: '#059669',
+              700: '#047857',
+              800: '#065f46',
+              900: '#064e3b',
+            },
+            nanstack: {
+              light: '#818cf8',
+              DEFAULT: '#6366f1',
+              dark: '#4f46e5'
+            }
+          },
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'system-ui', '-apple-system', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
+          },
+          boxShadow: {
+            'card': '0 10px 30px -5px rgba(15, 36, 64, 0.06), 0 4px 10px -2px rgba(15, 36, 64, 0.03)',
+            'float': '0 20px 40px -15px rgba(28, 77, 133, 0.18)',
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
+
+  <style>
+    /* Custom light navy scrollbars */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #f0f5fa;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #c5d8ed;
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #9bbfe0;
+    }
+
+    @keyframes pulseRing {
+      0% { transform: scale(0.95); opacity: 0.8; }
+      50% { transform: scale(1.15); opacity: 0.2; }
+      100% { transform: scale(0.95); opacity: 0.8; }
+    }
+    .pulse-ring {
+      animation: pulseRing 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    }
+
+    @keyframes ambientFloat {
+      0%, 100% { transform: translateY(0px) scale(1); }
+      50% { transform: translateY(-8px) scale(1.02); }
+    }
+    .ambient-float {
+      animation: ambientFloat 6s ease-in-out infinite;
+    }
+
+    /* Selected Active Sample Card Highlight - White & Light Navy Theme */
+    .sample-btn.active-sample {
+      border-color: #2563a6 !important;
+      background-color: #f0f6fc !important;
+      box-shadow: 0 0 0 2px rgba(37, 99, 166, 0.35), 0 8px 20px -3px rgba(37, 99, 166, 0.2) !important;
+      transform: translateY(-2px);
+    }
+    .sample-btn.active-sample .active-indicator {
+      display: inline-flex !important;
+    }
+    .sample-btn.active-sample .sample-title {
+      color: #163963 !important;
+    }
+
+    /* Print & Flow Optimization: Prevent Awkward Page Breaks */
+    .break-inside-avoid {
+      break-inside: avoid !important;
+      page-break-inside: avoid !important;
+    }
+
+    @media print {
+      @page {
+        size: A4 portrait;
+        margin: 10mm;
+      }
+      body {
+        background: #ffffff !important;
+        font-size: 11pt;
+      }
+      .no-print {
+        display: none !important;
+      }
+      .break-inside-avoid {
+        break-inside: avoid !important;
+        page-break-inside: avoid !important;
+      }
+    }
+  </style>
+</head>
+<body class="bg-gradient-to-b from-[#edf3fa] via-[#f5f8fc] to-[#e8f1fa] text-navy-900 min-h-screen flex flex-col font-sans selection:bg-navy-600 selection:text-white antialiased relative overflow-x-hidden">
+
+  <!-- Ambient Light Navy Background Accents -->
+  <div class="fixed inset-0 overflow-hidden pointer-events-none z-0">
+    <div class="ambient-float absolute -top-44 -left-44 w-[36rem] h-[36rem] bg-navy-200/50 rounded-full blur-[110px]"></div>
+    <div class="ambient-float absolute top-1/2 -right-44 w-[30rem] h-[30rem] bg-sky-200/40 rounded-full blur-[110px]" style="animation-delay: 2.5s;"></div>
+    <div class="ambient-float absolute -bottom-44 left-1/3 w-[32rem] h-[32rem] bg-navy-100/60 rounded-full blur-[110px]" style="animation-delay: 4.5s;"></div>
+    <div class="absolute inset-0 bg-[radial-gradient(#c5d8ed_1.2px,transparent_1.2px)] [background-size:24px_24px] opacity-60"></div>
+  </div>
+
+  <!-- Top Application Bar (White & Light Navy Blue) -->
+  <header class="sticky top-0 z-50 bg-white/95 backdrop-blur-xl border-b border-navy-200/90 px-3 sm:px-6 py-2.5 transition-all shadow-xs">
+    <div class="max-w-7xl mx-auto flex items-center justify-between gap-2 sm:gap-4">
+      
+      <!-- Brand & Title -->
+      <div class="flex items-center space-x-2.5 sm:space-x-3 min-w-0">
+        <a href="/dashboard" class="flex items-center space-x-2.5 sm:space-x-3 group cursor-pointer">
+          <div class="relative flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-gradient-to-tr from-navy-800 via-navy-700 to-navy-500 p-0.5 shadow-sm shadow-navy-700/20 shrink-0 group-hover:scale-105 transition-transform">
+            <div class="w-full h-full bg-white rounded-[14px] flex items-center justify-center">
+              <svg class="w-4 h-4 sm:w-5 sm:h-5 text-navy-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 100-6 3 3 0 000 6z" />
+              </svg>
+            </div>
+            <span class="absolute -bottom-0.5 -right-0.5 flex h-2.5 w-2.5">
+              <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-navy-400 opacity-75"></span>
+              <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-navy-600 border-2 border-white"></span>
+            </span>
+          </div>
+          <div class="min-w-0">
+            <div class="flex items-center gap-1.5 sm:gap-2">
+              <span class="font-extrabold text-base sm:text-lg tracking-tight text-navy-950 group-hover:text-navy-700 transition-colors truncate">PhytoEcho</span>
+            </div>
+            <p class="text-[11px] text-navy-600 font-medium hidden sm:block truncate">Plant Acoustic Health Monitor</p>
+          </div>
+        </a>
+      </div>
+
+      <!-- Center Benchmark Badges (Desktop) -->
+      <div class="hidden md:flex items-center space-x-2.5 text-xs">
+        <button onclick="openMetricsModal()" class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-navy-50/95 border border-navy-200/90 hover:bg-navy-100 transition-all text-navy-800 font-medium cursor-pointer shadow-2xs">
+          <span class="w-2 h-2 rounded-full bg-navy-500 animate-pulse"></span>
+          <span>Accuracy:</span>
+          <span class="font-bold text-navy-950 font-mono">{{ model_metrics.accuracy if model_metrics else 88.6 }}%</span>
+          <span class="text-[10px] px-1.5 py-0.2 rounded bg-navy-200/70 text-navy-900 font-mono font-semibold">5-Fold CV</span>
+        </button>
+        <div class="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-navy-100/80 border border-navy-200 text-navy-700 font-medium">
+          <span>Dataset:</span>
+          <span class="text-navy-950 font-bold font-mono">6,000</span>
+          <span>samples</span>
+        </div>
+      </div>
+
+      <!-- Developed by Nanstack Badge with Logo & Link -->
+      <div class="flex items-center gap-2 shrink-0">
+        <a href="https://nanstack.tech" target="_blank" rel="noopener noreferrer" 
+           title="Visit Nanstack Website"
+           class="group relative flex items-center gap-2 px-2.5 sm:px-3 py-1.5 rounded-xl bg-white border border-navy-200 hover:border-navy-400 hover:shadow-sm transition-all shadow-xs cursor-pointer">
+          <div class="w-6 h-6 sm:w-7 sm:h-7 rounded-lg bg-navy-50 p-0.5 flex items-center justify-center overflow-hidden shrink-0 border border-navy-200">
+            <img src="/static/images/nanstack_logo.jpg" alt="Nanstack Logo" class="w-full h-full object-contain">
+          </div>
+          <div class="text-left">
+            <div class="text-[8px] sm:text-[9px] uppercase tracking-wider text-navy-500 font-medium hidden xs:block">Developed by</div>
+            <div class="text-[11px] sm:text-xs font-bold text-navy-900 group-hover:text-navy-700 tracking-tight flex items-center gap-0.5 sm:gap-1 font-mono transition-colors">
+              <span class="hidden xs:inline">nanstack.tech</span>
+              <span class="xs:hidden">Nanstack</span>
+              <svg class="w-2.5 h-2.5 sm:w-3 sm:h-3 text-navy-600 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+              </svg>
+            </div>
+          </div>
+        </a>
+
+        <!-- User Profile & Sign Out Button -->
+        <div class="flex items-center gap-1.5 sm:gap-2 shrink-0 pl-1 sm:pl-2 border-l border-navy-200">
+          <div class="hidden sm:flex items-center gap-2">
+            <div class="w-8 h-8 rounded-xl bg-navy-100 text-navy-800 font-bold text-xs flex items-center justify-center border border-navy-200 shrink-0 shadow-2xs">
+              {{ (user.full_name[:1] if user and user.full_name else 'B') }}
+            </div>
+            <div class="hidden xl:block text-left text-xs leading-tight">
+              <div class="font-bold text-navy-900 truncate max-w-[130px]">{{ user.full_name if user else 'Botany Administrator' }}</div>
+              <div class="text-[10px] text-navy-600 truncate max-w-[130px]">{{ user.role if user else 'Lead Bio-Acoustic Scientist' }}</div>
+            </div>
+          </div>
+
+          <!-- Sign Out Button -->
+          <a href="/logout" 
+             title="Sign Out of PhytoEcho"
+             class="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl bg-navy-50 hover:bg-rose-50 border border-navy-200 hover:border-rose-200 text-navy-700 hover:text-rose-600 text-xs font-semibold transition-all group cursor-pointer shadow-2xs">
+            <svg class="w-3.5 h-3.5 text-navy-600 group-hover:text-rose-500 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+            </svg>
+            <span class="hidden xs:inline">Sign Out</span>
+          </a>
+        </div>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- Main Web App Body -->
+  <main class="relative z-10 max-w-7xl mx-auto px-3 sm:px-6 py-4 sm:py-5 flex-1 w-full space-y-4 sm:space-y-5">
+
+    <!-- Humanized App Hero Banner (White & Light Navy Blue) -->
+    <div class="bg-white/95 backdrop-blur-md rounded-2xl p-5 sm:p-6 border border-navy-200 shadow-card relative overflow-hidden break-inside-avoid">
+      <div class="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 sm:gap-6">
+        
+        <div class="space-y-2 sm:space-y-2.5 max-w-3xl">
+          <div class="inline-flex items-center gap-2 text-[10px] sm:text-xs font-bold uppercase tracking-wider text-navy-800 bg-navy-100 px-3 py-1 rounded-full border border-navy-200">
+            <span>🌿</span>
+            <span>Live Plant Health Check</span>
+            <span class="text-navy-300">•</span>
+            <span>Acoustic Stem Vibrations</span>
+          </div>
+          
+          <h1 class="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-navy-950 tracking-tight leading-tight">
+            How are your plants feeling today?
+          </h1>
+          
+          <p class="text-xs sm:text-sm text-navy-700 leading-relaxed max-w-2xl font-normal">
+            Choose a recorded plant sound or capture a live 5-second recording from your stem sensor. We'll analyze acoustic vibrations to evaluate hydration, thermal heat stress, and pest activity.
+          </p>
+
+          <!-- Quick Plant Species Focus Tags -->
+          <div class="flex flex-wrap items-center gap-1.5 pt-1 text-xs">
+            <span class="text-navy-500 text-[11px] font-medium mr-1">Tuned for:</span>
+            <span class="px-2 py-0.5 rounded-md bg-navy-50 text-navy-800 font-medium text-[11px] border border-navy-200/70">Tomato Vines</span>
+            <span class="px-2 py-0.5 rounded-md bg-navy-50 text-navy-800 font-medium text-[11px] border border-navy-200/70">Grapevine</span>
+            <span class="px-2 py-0.5 rounded-md bg-navy-50 text-navy-800 font-medium text-[11px] border border-navy-200/70">Wheat & Cereals</span>
+            <span class="px-2 py-0.5 rounded-md bg-navy-50 text-navy-800 font-medium text-[11px] border border-navy-200/70">Olive & Citrus</span>
+            <span class="px-2 py-0.5 rounded-md bg-navy-50 text-navy-800 font-medium text-[11px] border border-navy-200/70">Houseplants</span>
+          </div>
+        </div>
+
+        <!-- Quick Info Side Cards -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-1 gap-2.5 w-full lg:w-64 shrink-0">
+          
+          <button onclick="openMetricsModal()" class="p-2.5 rounded-xl bg-navy-50/80 hover:bg-navy-100/90 border border-navy-200 hover:border-navy-400 transition-all flex items-center gap-2.5 text-left group cursor-pointer shadow-2xs">
+            <div class="w-8 h-8 rounded-xl bg-navy-100 text-navy-700 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform border border-navy-200">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-width="2"/><circle cx="12" cy="12" r="6" stroke-width="2"/><circle cx="12" cy="12" r="2" stroke-width="2"/></svg>
+            </div>
+            <div class="min-w-0">
+              <div class="text-[9px] sm:text-[10px] text-navy-600 uppercase font-bold tracking-wider truncate">Test Accuracy</div>
+              <div class="text-xs font-bold text-navy-950 group-hover:text-navy-700 flex items-center gap-1 font-mono truncate">
+                <span>{{ model_metrics.accuracy if model_metrics else 88.6 }}% (5-Fold CV)</span>
+                <svg class="w-3 h-3 text-navy-600 shrink-0 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+              </div>
+            </div>
+          </button>
+          
+          <div class="p-2.5 rounded-xl bg-navy-50/80 border border-navy-200 flex items-center gap-2.5 shadow-2xs">
+            <div class="w-8 h-8 rounded-xl bg-navy-100 text-navy-700 flex items-center justify-center shrink-0 border border-navy-200">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 100-6 3 3 0 000 6z" /></svg>
+            </div>
+            <div class="min-w-0">
+              <div class="text-[9px] sm:text-[10px] text-navy-600 uppercase font-bold tracking-wider truncate">Trained Data</div>
+              <div class="text-xs font-bold text-navy-950 font-mono truncate">6,000 Plant Audio Clips</div>
+            </div>
+          </div>
+
+          <a href="https://nanstack.tech" target="_blank" rel="noopener noreferrer" class="p-2.5 rounded-xl bg-navy-50/80 hover:bg-navy-100/90 border border-navy-200 hover:border-navy-400 transition-all flex items-center gap-2.5 group cursor-pointer shadow-2xs">
+            <div class="w-8 h-8 rounded-xl bg-white p-0.5 flex items-center justify-center shrink-0 shadow-xs border border-navy-200 group-hover:scale-105 transition-transform">
+              <img src="/static/images/nanstack_logo.jpg" alt="Nanstack" class="w-full h-full object-contain">
+            </div>
+            <div class="min-w-0">
+              <div class="text-[9px] sm:text-[10px] text-navy-600 uppercase font-bold tracking-wider truncate">Acoustic Engine</div>
+              <div class="text-xs font-bold text-navy-950 group-hover:text-navy-700 transition-colors flex items-center gap-1 truncate font-mono">
+                <span>Nanstack BioML</span>
+                <svg class="w-2.5 h-2.5 text-navy-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+              </div>
+            </div>
+          </a>
+
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Audio Source Selector Tabs (White & Light Navy Blue) -->
+    <div class="space-y-3 sm:space-y-3.5 break-inside-avoid">
+      
+      <!-- Tab Control Bar -->
+      <div class="space-y-2 border-b border-navy-200/90 pb-2.5">
+        <div class="w-full grid grid-cols-3 gap-1.5 p-1.5 bg-navy-100/90 rounded-2xl border border-navy-200">
+          <button id="tab-presets" onclick="switchInputTab('presets')" class="tab-btn px-2 sm:px-4 py-2 sm:py-2 rounded-xl text-xs font-bold transition-all bg-white text-navy-950 shadow-sm border border-navy-200/80 flex items-center justify-center gap-1.5 sm:gap-2 cursor-pointer">
+            <svg class="w-4 h-4 text-navy-700 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
+            <span class="truncate">Typical Conditions</span>
+          </button>
+          <button id="tab-upload" onclick="switchInputTab('upload')" class="tab-btn px-2 sm:px-4 py-2 sm:py-2 rounded-xl text-xs font-semibold transition-all text-navy-700 hover:text-navy-950 flex items-center justify-center gap-1.5 sm:gap-2 cursor-pointer">
+            <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
+            <span class="truncate">Upload Sound</span>
+          </button>
+          <button id="tab-record" onclick="switchInputTab('record')" class="tab-btn px-2 sm:px-4 py-2 sm:py-2 rounded-xl text-xs font-semibold transition-all text-navy-700 hover:text-navy-950 flex items-center justify-center gap-1.5 sm:gap-2 cursor-pointer">
+            <span class="w-2 h-2 rounded-full bg-rose-500 animate-pulse shrink-0"></span>
+            <svg class="w-4 h-4 text-rose-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 100-6 3 3 0 000 6z"/></svg>
+            <span class="truncate">Record Live Stem</span>
+          </button>
+        </div>
+        
+        <div class="flex items-center justify-between text-xs text-navy-700 px-1">
+          <span class="font-medium">Select a plant sound sample or record live from your sensor:</span>
+          <button onclick="openMetricsModal()" class="text-navy-800 hover:text-navy-950 font-bold flex items-center gap-1 transition-colors ml-auto cursor-pointer">
+            <span>Accuracy: {{ model_metrics.accuracy if model_metrics else 88.6 }}%</span>
+            <span>&rarr;</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Tab Content 1: Preset Samples Grid (White & Light Navy) -->
+      <div id="content-presets" class="tab-content transition-all">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3.5">
+          {% for sample in preset_samples %}
+          <button onclick="loadSample('{{ sample.filename }}', this)" 
+                  data-filename="{{ sample.filename }}"
+                  class="sample-btn text-left p-4 rounded-2xl bg-white hover:bg-navy-50/60 transition-all duration-200 border border-navy-200 hover:border-navy-300 group focus:outline-none flex flex-col justify-between h-full shadow-card hover:shadow-md cursor-pointer">
+            <div>
+              <div class="flex items-center justify-between mb-3">
+                {% if sample.id == 'healthy' %}
+                <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-emerald-50 border border-emerald-200 flex items-center justify-center text-emerald-600 group-hover:scale-110 transition-transform shrink-0 shadow-2xs">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 21a9 9 0 0 1-9-9c0-4.97 4.03-9 9-9 4.97 0 9 4.03 9 9-2.5 0-5 1-6.5 2.5C13 16 12 18.5 12 21zM12 3v18"/></svg>
+                </div>
+                {% elif sample.id == 'drought' %}
+                <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-amber-50 border border-amber-200 flex items-center justify-center text-amber-600 group-hover:scale-110 transition-transform shrink-0 shadow-2xs">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0zM8 14a4 4 0 0 0 4 4"/></svg>
+                </div>
+                {% elif sample.id == 'heat' %}
+                <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-orange-50 border border-orange-200 flex items-center justify-center text-orange-600 group-hover:scale-110 transition-transform shrink-0 shadow-2xs">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4" stroke-width="2"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 2v2m0 16v2M4.93 4.93l1.41 1.41m11.32 11.32l1.41 1.41M2 12h2m16 0h2M6.34 17.66l-1.41 1.41m14.14-14.14l-1.41 1.41"/></svg>
+                </div>
+                {% elif sample.id == 'pest' %}
+                <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-rose-50 border border-rose-200 flex items-center justify-center text-rose-600 group-hover:scale-110 transition-transform shrink-0 shadow-2xs">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect width="8" height="14" x="8" y="6" rx="4" stroke-width="2"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 7-3 2m3 6-3-1m3 6-3-2M5 7l3 2m-3 6 3-1m-3 6 3-2M10 2l1 2m3-2-1 2"/></svg>
+                </div>
+                {% else %}
+                <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-navy-100 border border-navy-200 flex items-center justify-center text-navy-700 group-hover:scale-110 transition-transform shrink-0 shadow-2xs">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+                </div>
+                {% endif %}
+                
+                <div class="flex items-center gap-1.5">
+                  <span class="active-indicator hidden text-[9px] font-extrabold px-2 py-0.5 rounded-full bg-navy-700 text-white uppercase tracking-wider">Active</span>
+                  <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-navy-100 text-navy-700 border border-navy-200/80 uppercase tracking-wider">Sample</span>
+                </div>
+              </div>
+              
+              <h4 class="sample-title font-bold text-sm text-navy-950 group-hover:text-navy-700 transition-colors">
+                {{ sample.title }}
+              </h4>
+              <p class="text-xs text-navy-700/80 mt-1 leading-relaxed line-clamp-2">
+                {{ sample.desc }}
+              </p>
+            </div>
+            
+            <div class="mt-3.5 pt-2.5 border-t border-navy-100 flex items-center justify-between text-xs text-navy-600">
+              <span class="font-mono font-medium text-navy-700">5.0s</span>
+              <span class="text-navy-800 font-bold group-hover:translate-x-0.5 transition-transform flex items-center gap-1">
+                Listen &rarr;
+              </span>
+            </div>
+          </button>
+          {% endfor %}
+        </div>
+      </div>
+
+      <!-- Tab Content 2: Drag and Drop Uploader (White & Light Navy) -->
+      <div id="content-upload" class="tab-content hidden transition-all">
+        <div id="drop-zone" 
+             class="bg-[#f7fafe] rounded-2xl border-2 border-dashed border-navy-300 hover:border-navy-600 hover:bg-navy-50/70 transition-all p-8 text-center flex flex-col items-center justify-center min-h-[220px] cursor-pointer group shadow-card">
+          <input type="file" id="file-input" accept="audio/*,.wav,.mp3,.ogg,.flac,.webm" class="hidden" onchange="handleFileSelect(this.files)">
+          <div class="w-16 h-16 rounded-2xl bg-navy-100 border border-navy-200 flex items-center justify-center text-navy-700 mb-3 group-hover:scale-110 transition-transform shadow-xs">
+            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+            </svg>
+          </div>
+          <p class="text-base font-bold text-navy-950">Drop your plant stem audio here</p>
+          <p class="text-xs text-navy-700 mt-1">or <span class="text-navy-800 underline font-semibold">browse files</span> on your device</p>
+          <div class="flex items-center gap-2 mt-4 text-xs text-navy-700 bg-navy-100/90 px-3.5 py-1.5 rounded-full border border-navy-200 font-medium">
+            <span>Supports WAV, MP3, FLAC, OGG, WEBM</span>
+            <span>•</span>
+            <span>Up to 32MB</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab Content 3: Live Microphone Recording -->
+      <div id="content-record" class="tab-content hidden transition-all">
+        <div class="bg-white rounded-2xl p-6 sm:p-8 text-center flex flex-col items-center justify-center min-h-[220px] space-y-4 border border-navy-200 shadow-card">
+          <div class="relative">
+            <button id="record-btn" onclick="toggleRecording()" class="w-20 h-20 rounded-full bg-navy-700 hover:bg-navy-600 text-white flex items-center justify-center shadow-lg shadow-navy-700/30 transition-all focus:outline-none focus:ring-4 focus:ring-navy-500/30 cursor-pointer">
+              <svg id="record-mic-icon" class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 100-6 3 3 0 000 6z" />
+              </svg>
+              <div id="record-pulse-ring" class="absolute inset-0 rounded-full border-4 border-navy-500 pulse-ring hidden"></div>
+            </button>
+          </div>
+          <div>
+            <h4 id="record-status" class="text-base font-bold text-navy-950">Click to Record Live Plant Stem Vibrations</h4>
+            <p id="record-instruction" class="text-xs text-navy-700 mt-1 max-w-md mx-auto">Connect your contact piezo sensor or place your microphone near the stem. Records 5 seconds of audio.</p>
+            <div id="record-timer" class="text-xl font-mono font-extrabold text-navy-800 mt-2 hidden">00:05</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Audio Player & Interactive Visualizers Deck (White & Light Navy) -->
+    <div id="player-container" class="bg-white/95 backdrop-blur-md rounded-2xl p-4 sm:p-5 border border-navy-200 shadow-card space-y-3.5 hidden break-inside-avoid">
+      
+      <!-- Playback Controls Bar -->
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-navy-100">
+        
+        <div class="flex items-center space-x-3 min-w-0">
+          <button id="play-btn" onclick="togglePlay()" class="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-gradient-to-tr from-navy-800 via-navy-700 to-navy-600 hover:from-navy-900 hover:to-navy-700 text-white font-bold flex items-center justify-center shadow-md shadow-navy-700/25 transition-all shrink-0 focus:outline-none cursor-pointer">
+            <svg id="play-icon" class="w-5 h-5 sm:w-6 sm:h-6 ml-0.5" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+            <svg id="pause-icon" class="w-5 h-5 sm:w-6 sm:h-6 hidden" fill="currentColor" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+          </button>
+          <div class="min-w-0">
+            <div id="audio-filename" class="text-sm font-bold text-navy-950 truncate max-w-[200px] xs:max-w-[260px] sm:max-w-md">Sample: -</div>
+            <div class="flex items-center gap-2 mt-0.5 text-xs text-navy-600 font-mono">
+              <span id="audio-time">0:00 / 0:00</span>
+              <span>•</span>
+              <span id="duration-badge" class="text-navy-800 font-semibold bg-navy-50 px-2 py-0.5 rounded border border-navy-200">5.0s Clip</span>
+            </div>
+          </div>
+        </div>
+        <audio id="audio-element" class="hidden" onended="onAudioEnded()"></audio>
+
+        <!-- Speed and Playback Controls -->
+        <div class="flex items-center justify-between sm:justify-end gap-2 text-xs pt-1 sm:pt-0">
+          <div class="flex items-center bg-navy-100 rounded-xl p-0.5 border border-navy-200">
+            <button onclick="setSpeed(0.5, this)" class="speed-btn px-2.5 py-1 text-xs rounded-lg text-navy-700 hover:text-navy-950 cursor-pointer" title="Slow motion (0.5x)">0.5x</button>
+            <button onclick="setSpeed(1.0, this)" class="speed-btn px-2.5 py-1 text-xs rounded-lg bg-white text-navy-900 font-bold shadow-xs cursor-pointer">1.0x</button>
+            <button onclick="setSpeed(1.5, this)" class="speed-btn px-2.5 py-1 text-xs rounded-lg text-navy-700 hover:text-navy-950 cursor-pointer">1.5x</button>
+          </div>
+          <div class="flex items-center gap-1.5 text-xs">
+            <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-navy-50 border border-navy-200 text-navy-800 font-medium">
+              <span class="w-1.5 h-1.5 rounded-full bg-navy-600 shrink-0"></span> Waveform
+            </span>
+            <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-amber-50 border border-amber-200 text-amber-800 font-medium">
+              <span class="w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0"></span> Stress Clicks
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Real-Time Visualizers (High-Contrast White & Light Navy) -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-3 sm:gap-4">
+        
+        <!-- 1. Waveform Canvas with Cavitation Click Pins -->
+        <div class="bg-navy-50/80 rounded-2xl p-3 border border-navy-200">
+          <div class="text-xs text-navy-700 mb-1.5 flex justify-between font-medium">
+            <span class="flex items-center gap-1.5 text-navy-900 font-bold truncate">
+              <svg class="w-4 h-4 shrink-0 text-navy-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+              Stem Acoustic Waveform
+            </span>
+            <span id="click-marker-count" class="text-amber-800 font-mono text-[11px] font-bold bg-amber-100/90 border border-amber-200 px-2 py-0.2 rounded shrink-0">0 Clicks</span>
+          </div>
+          <canvas id="waveform-canvas" height="96" class="w-full rounded-xl cursor-pointer border border-navy-200 bg-white" onclick="seekAudio(event)"></canvas>
+        </div>
+
+        <!-- 2. 2D Spectrogram Heatmap Canvas -->
+        <div class="bg-navy-50/80 rounded-2xl p-3 border border-navy-200">
+          <div class="text-xs text-navy-700 mb-1.5 flex justify-between font-medium">
+            <span class="flex items-center gap-1.5 text-navy-900 font-bold truncate">
+              <svg class="w-4 h-4 shrink-0 text-navy-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"/></svg>
+              Spectrogram Density Heatmap
+            </span>
+            <span class="text-navy-600 font-mono text-[11px] shrink-0">Time vs Freq (dB)</span>
+          </div>
+          <canvas id="heatmap-canvas" height="96" class="w-full rounded-xl border border-navy-200 bg-white"></canvas>
+        </div>
+
+        <!-- 3. FFT Acoustic Frequency Spectrum Canvas -->
+        <div class="bg-navy-50/80 rounded-2xl p-3 border border-navy-200">
+          <div class="text-xs text-navy-700 mb-1.5 flex justify-between font-medium">
+            <span class="flex items-center gap-1.5 text-navy-900 font-bold truncate">
+              <svg class="w-4 h-4 shrink-0 text-navy-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+              Frequency Bands
+            </span>
+            <span class="text-navy-800 font-mono text-[11px] font-bold shrink-0">50Hz - 8kHz</span>
+          </div>
+          <canvas id="spectrum-canvas" height="96" class="w-full rounded-xl border border-navy-200 bg-white"></canvas>
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- Loading Spinner State -->
+    <div id="loading-indicator" class="bg-white rounded-2xl p-10 text-center space-y-4 border border-navy-200 shadow-card hidden">
+      <div class="w-14 h-14 border-4 border-navy-600 border-t-transparent rounded-full animate-spin mx-auto"></div>
+      <p class="text-base font-bold text-navy-950">Analyzing Plant Stem Audio...</p>
+      <p class="text-xs text-navy-600">Listening for thirst clicks, heat stress, and pest activity</p>
+    </div>
+
+    <!-- Out-of-Distribution / Irrelevant Audio Rejection Alert Banner -->
+    <div id="rejection-card" class="rounded-3xl p-5 sm:p-7 border border-amber-300 bg-amber-50/95 text-amber-950 shadow-card hidden break-inside-avoid">
+      <div class="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-5">
+        <div class="flex items-start gap-4">
+          <div class="w-12 h-12 rounded-2xl bg-amber-100 border border-amber-300 text-amber-800 flex items-center justify-center shrink-0 shadow-xs">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+            </svg>
+          </div>
+          <div class="space-y-1.5">
+            <div class="flex flex-wrap items-center gap-2">
+              <span class="px-3 py-0.5 rounded-full text-xs font-extrabold uppercase tracking-wider bg-amber-200/80 text-amber-900 border border-amber-300">
+                Non-Plant Audio Filtered
+              </span>
+              <span class="text-xs font-bold text-amber-800 bg-white/80 px-2.5 py-0.5 rounded-full border border-amber-200">
+                No Prediction Generated
+              </span>
+            </div>
+            <h2 id="rejection-title" class="text-xl sm:text-2xl font-extrabold text-amber-950 tracking-tight">
+              No Plant Stem Vibrations Detected
+            </h2>
+            <p id="rejection-message" class="text-xs sm:text-sm text-amber-900/90 max-w-2xl leading-relaxed">
+              The uploaded audio recording does not match plant stem bio-acoustic signatures. Speech, vocal harmonics, or ambient room noise were detected. To preserve diagnostic integrity, no plant stress condition was predicted.
+            </p>
+          </div>
+        </div>
+        
+        <div class="shrink-0 w-full lg:w-auto p-4 rounded-2xl bg-white border border-amber-200 shadow-2xs text-left text-xs text-slate-700 space-y-1.5 max-w-sm">
+          <div class="font-bold text-slate-900 flex items-center gap-1.5">
+            <span class="text-amber-600">💡</span> <span>Sensor Attachment Advice</span>
+          </div>
+          <p class="text-[11px] text-slate-600 leading-snug">
+            To record valid plant acoustics, place a contact piezoelectric sensor directly on a healthy stem, or test with the canonical botanical samples above.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- AI Diagnostic & Prediction HUD -->
+    <div id="results-container" class="space-y-4 sm:space-y-5 hidden break-inside-avoid">
+      
+      <!-- Primary Status Card -->
+      <div id="status-card" class="rounded-3xl p-5 sm:p-6 border transition-all duration-300 shadow-card break-inside-avoid">
+        <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 sm:gap-6">
+          <div class="space-y-2">
+            <div class="flex flex-wrap items-center gap-2 sm:gap-3">
+              <span id="status-badge" class="px-3.5 py-1 rounded-full text-xs font-bold uppercase tracking-wider"></span>
+              <span class="text-xs text-navy-700 font-medium">Confidence: <strong id="confidence-val" class="text-navy-950 font-bold">100.0%</strong></span>
+              <span id="severity-badge" class="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-white/80 border border-navy-200 text-navy-800"></span>
+            </div>
+            <h2 id="status-title" class="text-2xl sm:text-3xl font-extrabold text-navy-950 tracking-tight"></h2>
+            <p id="status-desc" class="text-sm text-navy-800 max-w-3xl leading-relaxed"></p>
+          </div>
+          
+          <!-- Key Metric Gauges -->
+          <div class="shrink-0 w-full md:w-auto grid grid-cols-2 md:grid-cols-1 gap-2.5">
+            <div class="p-3 sm:p-3.5 rounded-2xl bg-white border border-navy-200/90 shadow-xs text-center">
+              <span class="text-[10px] text-navy-600 font-bold tracking-wider uppercase">Cavitation Clicks</span>
+              <div id="metric-clicks-big" class="text-2xl sm:text-3xl font-extrabold text-navy-800 font-mono my-0.5">12</div>
+              <span class="text-[10px] text-navy-600 font-medium">stress pulses detected</span>
+            </div>
+            <div class="p-3 sm:p-3.5 rounded-2xl bg-white border border-navy-200/90 shadow-xs text-center">
+              <span class="text-[10px] text-navy-600 font-bold tracking-wider uppercase">Stem Water Balance</span>
+              <div id="metric-hydraulic-risk" class="text-sm sm:text-base font-extrabold text-amber-700 font-mono my-0.5">Low (Needs Water)</div>
+              <span class="text-[10px] text-navy-600 font-medium">hydraulic tension</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Detail Grid: Predictions Breakdown & Acoustic Telemetry -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-5 break-inside-avoid">
+        
+        <!-- Multi-Class Probability Bar Chart -->
+        <div class="lg:col-span-6 bg-white/95 backdrop-blur-md rounded-2xl p-4 sm:p-5 border border-navy-200 shadow-card space-y-3">
+          <div class="flex items-center justify-between border-b border-navy-100 pb-2.5">
+            <h3 class="text-xs sm:text-sm font-bold text-navy-950 flex items-center gap-1.5 sm:gap-2">
+              <svg class="w-4 h-4 text-navy-700 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+              <span>Condition Probability Distribution</span>
+            </h3>
+            <span class="text-xs text-navy-600 font-medium">5 Conditions</span>
+          </div>
+          <div id="probabilities-container" class="space-y-2.5 pt-1">
+            <!-- Injected by JavaScript -->
+          </div>
+        </div>
+
+        <!-- Sensor Telemetry Metrics Cards -->
+        <div class="lg:col-span-6 bg-white/95 backdrop-blur-md rounded-2xl p-4 sm:p-5 border border-navy-200 shadow-card space-y-3">
+          <div class="flex items-center justify-between border-b border-navy-100 pb-2.5">
+            <h3 class="text-xs sm:text-sm font-bold text-navy-950 flex items-center gap-1.5 sm:gap-2">
+              <svg class="w-4 h-4 text-navy-700 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/></svg>
+              <span>Acoustic Signal Telemetry</span>
+            </h3>
+            <span class="text-xs text-navy-600 font-medium">Sensor Metrics</span>
+          </div>
+
+          <div class="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+            <div class="p-3 rounded-2xl bg-navy-50/90 border border-navy-200/90 min-w-0">
+              <div class="text-[11px] text-navy-600 font-bold uppercase tracking-wider">Crest Factor</div>
+              <div id="metric-crest" class="text-base sm:text-lg font-extrabold text-navy-950 font-mono mt-0.5 truncate">42.64</div>
+              <div class="text-[11px] text-navy-700 font-medium mt-0.5">Peak / RMS ratio</div>
+            </div>
+            <div class="p-3 rounded-2xl bg-navy-50/90 border border-navy-200/90 min-w-0">
+              <div class="text-[11px] text-navy-600 font-bold uppercase tracking-wider">Vibration RMS</div>
+              <div id="metric-rms" class="text-base sm:text-lg font-extrabold text-navy-950 font-mono mt-0.5 truncate">0.0132</div>
+              <div class="text-[11px] text-navy-700 font-medium mt-0.5">Signal power (V)</div>
+            </div>
+            <div class="p-3 rounded-2xl bg-navy-50/90 border border-navy-200/90 min-w-0">
+              <div class="text-[11px] text-navy-600 font-bold uppercase tracking-wider">Dominant Freq</div>
+              <div id="metric-centroid" class="text-base sm:text-lg font-extrabold text-navy-950 font-mono mt-0.5 truncate">4,336 Hz</div>
+              <div class="text-[11px] text-navy-700 font-medium mt-0.5">Acoustic center</div>
+            </div>
+            <div class="p-3 rounded-2xl bg-navy-50/90 border border-navy-200/90 min-w-0">
+              <div class="text-[11px] text-navy-600 font-bold uppercase tracking-wider">Wave Kurtosis</div>
+              <div id="metric-kurtosis" class="text-base sm:text-lg font-extrabold text-navy-950 font-mono mt-0.5 truncate">461.11</div>
+              <div class="text-[11px] text-navy-700 font-medium mt-0.5">Impulse sharpness</div>
+            </div>
+            <div class="p-3 rounded-2xl bg-navy-50/90 border border-navy-200/90 min-w-0">
+              <div class="text-[11px] text-navy-600 font-bold uppercase tracking-wider">Click Rate</div>
+              <div id="metric-click-rate" class="text-base sm:text-lg font-extrabold text-navy-950 font-mono mt-0.5 truncate">2.4 /s</div>
+              <div class="text-[11px] text-navy-700 font-medium mt-0.5">Pulses per second</div>
+            </div>
+            <div class="p-3 rounded-2xl bg-navy-50/90 border border-navy-200/90 min-w-0">
+              <div class="text-[11px] text-navy-600 font-bold uppercase tracking-wider">Interval (ICI)</div>
+              <div id="metric-ici" class="text-base sm:text-lg font-extrabold text-navy-950 font-mono mt-0.5 truncate">370.7 ms</div>
+              <div class="text-[11px] text-navy-700 font-medium mt-0.5">Mean click gap</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Humanized Plant Care Recommendations -->
+      <div class="recommendations-deck bg-white/95 backdrop-blur-md rounded-2xl p-4 sm:p-5 border border-navy-200 shadow-card space-y-3 break-inside-avoid">
+        <div class="flex items-center justify-between border-b border-navy-100 pb-2.5">
+          <h3 class="text-xs sm:text-sm font-bold text-navy-950 flex items-center gap-1.5 sm:gap-2">
+            <svg class="w-4 h-4 text-navy-700 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+            <span>Care Recommendations for Your Plant</span>
+          </h3>
+          <span class="text-xs text-navy-800 font-bold bg-navy-100 px-2.5 py-0.5 rounded-full border border-navy-200 shrink-0">Action Steps</span>
+        </div>
+        <div id="actions-list" class="grid grid-cols-1 md:grid-cols-3 gap-3 pt-1">
+          <!-- Injected by JavaScript -->
+        </div>
+      </div>
+
+      <!-- Signal Quality & Reliability Alerts Banner -->
+      <div id="quality-warnings-card" class="rounded-2xl p-4 bg-amber-50/90 border border-amber-300 text-amber-950 space-y-2 hidden break-inside-avoid">
+        <div class="flex items-center gap-2 text-xs font-bold text-amber-900 uppercase tracking-wider">
+          <svg class="w-4 h-4 text-amber-700 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+          <span>Audio Quality & Sensor Reliability Advisory</span>
+        </div>
+        <div id="quality-warnings-list" class="space-y-1.5 text-xs text-amber-900/90 leading-relaxed font-normal">
+          <!-- Injected by JavaScript -->
+        </div>
+      </div>
+
+      <!-- Scientific Ground-Truth Botanical Disclaimer Card -->
+      <div class="rounded-2xl p-4 bg-navy-50/90 border border-navy-200 text-navy-700 text-xs leading-relaxed space-y-1.5 break-inside-avoid">
+        <div class="font-bold text-navy-950 flex items-center gap-1.5">
+          <span class="text-navy-700">🔬</span> <span>Botanical Methodology & Diagnostic Boundary</span>
+        </div>
+        <p id="botanical-disclaimer-text" class="text-[11px] text-navy-600 leading-snug">
+          PhytoSound AI provides bio-acoustic screening heuristics based on plant stem micro-vibrations and cavitation physics. Acoustic alerts indicate mechanical and hydraulic vascular activity and should be verified against ground-truth physiological sensors (e.g. soil tensiometers, stomatal conductance porometers, or Scholander pressure bombs) before making definitive agronomic intervention decisions.
+        </p>
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- Model Accuracy & Benchmark Modal (White & Light Navy Blue) -->
+  <div id="metrics-modal" class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-navy-950/40 backdrop-blur-sm hidden">
+    <div class="bg-white rounded-3xl border border-navy-200 max-w-2xl w-full p-5 sm:p-7 space-y-4 sm:space-y-5 shadow-2xl relative max-h-[88vh] overflow-y-auto">
+      
+      <div class="flex items-center justify-between border-b border-navy-100 pb-3.5">
+        <div class="flex items-center gap-2.5 min-w-0">
+          <div class="w-9 h-9 rounded-xl bg-navy-100 text-navy-800 flex items-center justify-center shrink-0 border border-navy-200">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+          </div>
+          <div class="min-w-0">
+            <h3 class="text-base sm:text-lg font-bold text-navy-950 truncate">AI Diagnostic Accuracy & Benchmarks</h3>
+            <p class="text-xs text-navy-600 truncate">Cross Validation Results on 6,000 Samples</p>
+          </div>
+        </div>
+        <button onclick="closeMetricsModal()" class="w-8 h-8 rounded-xl bg-navy-100 hover:bg-navy-200 text-navy-700 flex items-center justify-center text-lg font-bold shrink-0 cursor-pointer">
+          &times;
+        </button>
+      </div>
+
+      <!-- Overview Cards -->
+      <div class="grid grid-cols-3 gap-2.5 sm:gap-3">
+        <div class="p-3 sm:p-3.5 rounded-2xl bg-navy-50 border border-navy-200 text-center">
+          <div class="text-[10px] text-navy-600 uppercase font-bold truncate">Accuracy</div>
+          <div class="text-xl sm:text-2xl font-extrabold text-navy-900 font-mono mt-0.5">{{ model_metrics.accuracy if model_metrics else 88.6 }}%</div>
+          <div class="text-[10px] text-navy-500 font-mono truncate">5-Fold CV</div>
+        </div>
+        <div class="p-3 sm:p-3.5 rounded-2xl bg-navy-50 border border-navy-200 text-center">
+          <div class="text-[10px] text-navy-600 uppercase font-bold truncate">Dataset</div>
+          <div class="text-xl sm:text-2xl font-extrabold text-navy-950 font-mono mt-0.5">6,000</div>
+          <div class="text-[10px] text-navy-500 font-mono truncate">Samples</div>
+        </div>
+        <div class="p-3 sm:p-3.5 rounded-2xl bg-navy-50 border border-navy-200 text-center">
+          <div class="text-[10px] text-navy-600 uppercase font-bold truncate">Acoustic Features</div>
+          <div class="text-xl sm:text-2xl font-extrabold text-navy-700 font-mono mt-0.5">22</div>
+          <div class="text-[10px] text-navy-500 font-mono truncate">Descriptors</div>
+        </div>
+      </div>
+
+      <!-- Top Feature Importances -->
+      <div class="space-y-2">
+        <h4 class="text-xs font-bold text-navy-800 uppercase tracking-wider">Top Influential Acoustic Indicators</h4>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs font-mono">
+          <div class="p-2.5 rounded-xl bg-navy-50 border border-navy-200 flex justify-between">
+            <span class="text-navy-800">1. Crest Factor (Peak/RMS)</span>
+            <span class="text-navy-900 font-bold">10.4%</span>
+          </div>
+          <div class="p-2.5 rounded-xl bg-navy-50 border border-navy-200 flex justify-between">
+            <span class="text-navy-800">2. Cavitation Clicks / Sec</span>
+            <span class="text-navy-900 font-bold">9.1%</span>
+          </div>
+          <div class="p-2.5 rounded-xl bg-navy-50 border border-navy-200 flex justify-between">
+            <span class="text-navy-800">3. Click Gap (ICI)</span>
+            <span class="text-navy-900 font-bold">7.8%</span>
+          </div>
+          <div class="p-2.5 rounded-xl bg-navy-50 border border-navy-200 flex justify-between">
+            <span class="text-navy-800">4. High-Freq Band (6.5kHz)</span>
+            <span class="text-navy-900 font-bold">7.6%</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Confusion Matrix Table with Horizontal Scroll Support -->
+      <div class="space-y-2">
+        <div class="flex items-center justify-between">
+          <h4 class="text-xs font-bold text-navy-800 uppercase tracking-wider">5x5 Classification Matrix</h4>
+          <span class="text-[10px] text-navy-500 sm:hidden">(Swipe horizontally)</span>
+        </div>
+        <div class="overflow-x-auto -mx-1 px-1">
+          <table class="w-full text-xs font-mono border-collapse text-center min-w-[280px]">
+            <thead>
+              <tr class="text-navy-700 border-b border-navy-200 bg-navy-50">
+                <th class="p-2 text-left">Class</th>
+                <th class="p-2">Healthy</th>
+                <th class="p-2">Drought</th>
+                <th class="p-2">Heat</th>
+                <th class="p-2">Pest</th>
+                <th class="p-2">Injury</th>
+              </tr>
+            </thead>
+            <tbody class="text-navy-900 divide-y divide-navy-100">
+              <tr>
+                <td class="p-2 text-left font-medium text-navy-600">Healthy</td>
+                <td class="p-2 bg-navy-100/90 text-navy-950 font-bold rounded">1,092</td>
+                <td class="p-2 text-navy-600 font-mono">24</td>
+                <td class="p-2 text-navy-600 font-mono">18</td>
+                <td class="p-2 text-navy-600 font-mono">48</td>
+                <td class="p-2 text-navy-600 font-mono">18</td>
+              </tr>
+              <tr>
+                <td class="p-2 text-left font-medium text-navy-600">Drought</td>
+                <td class="p-2 text-navy-600 font-mono">30</td>
+                <td class="p-2 bg-navy-100/90 text-navy-950 font-bold rounded">1,044</td>
+                <td class="p-2 text-navy-600 font-mono">86</td>
+                <td class="p-2 text-navy-600 font-mono">24</td>
+                <td class="p-2 text-navy-600 font-mono">16</td>
+              </tr>
+              <tr>
+                <td class="p-2 text-left font-medium text-navy-600">Heat</td>
+                <td class="p-2 text-navy-600 font-mono">34</td>
+                <td class="p-2 text-navy-600 font-mono">92</td>
+                <td class="p-2 bg-navy-100/90 text-navy-950 font-bold rounded">1,026</td>
+                <td class="p-2 text-navy-600 font-mono">26</td>
+                <td class="p-2 text-navy-600 font-mono">22</td>
+              </tr>
+              <tr>
+                <td class="p-2 text-left font-medium text-navy-600">Pest</td>
+                <td class="p-2 text-navy-600 font-mono">52</td>
+                <td class="p-2 text-navy-600 font-mono">28</td>
+                <td class="p-2 text-navy-600 font-mono">22</td>
+                <td class="p-2 bg-navy-100/90 text-navy-950 font-bold rounded">1,068</td>
+                <td class="p-2 text-navy-600 font-mono">30</td>
+              </tr>
+              <tr>
+                <td class="p-2 text-left font-medium text-navy-600">Injury</td>
+                <td class="p-2 text-navy-600 font-mono">26</td>
+                <td class="p-2 text-navy-600 font-mono">22</td>
+                <td class="p-2 text-navy-600 font-mono">32</td>
+                <td class="p-2 text-navy-600 font-mono">34</td>
+                <td class="p-2 bg-navy-100/90 text-navy-950 font-bold rounded">1,086</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="pt-2 border-t border-navy-100 flex justify-end">
+        <button onclick="closeMetricsModal()" class="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-gradient-to-r from-navy-800 to-navy-600 hover:from-navy-900 hover:to-navy-700 text-white font-bold text-xs shadow-md shadow-navy-700/20 hover:shadow-lg transition-all text-center cursor-pointer">
+          Close Window
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Clean Light-Mode App Footer with "Developed by Nanstack" (White & Light Navy) -->
+  <footer class="relative z-10 border-t border-navy-200 bg-white/95 backdrop-blur-md px-4 sm:px-6 py-5 text-navy-600 break-inside-avoid">
+    <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+      
+      <!-- Brand & Description -->
+      <a href="https://nanstack.tech" target="_blank" rel="noopener noreferrer" class="flex items-center space-x-3 text-center md:text-left group cursor-pointer">
+        <div class="w-9 h-9 rounded-xl bg-white p-1 flex items-center justify-center overflow-hidden shrink-0 shadow-xs border border-navy-200 group-hover:scale-105 transition-transform">
+          <img src="/static/images/nanstack_logo.jpg" alt="Nanstack Logo" class="w-full h-full object-contain">
+        </div>
+        <div>
+          <div class="text-xs font-semibold text-navy-950 group-hover:text-navy-700 transition-colors">
+            PhytoEcho — Plant Acoustic Health Monitor
+          </div>
+          <div class="text-[11px] text-navy-600">
+            Acoustic Stem Vibrations & Early Stress Diagnostics
+          </div>
+        </div>
+      </a>
+
+      <!-- Developed by Nanstack Central Signature Tag with Logo & Link -->
+      <div class="flex items-center">
+        <a href="https://nanstack.tech" target="_blank" rel="noopener noreferrer" 
+           title="Visit nanstack.tech"
+           class="group inline-flex items-center gap-3 px-4 py-2 rounded-2xl bg-navy-50 border border-navy-200 hover:border-navy-400 hover:shadow-sm transition-all shadow-2xs">
+          <div class="w-7 h-7 rounded-lg bg-white p-0.5 flex items-center justify-center overflow-hidden shrink-0 border border-navy-200 shadow-xs">
+            <img src="/static/images/nanstack_logo.jpg" alt="Nanstack" class="w-full h-full object-contain">
+          </div>
+          <div class="text-left">
+            <div class="flex items-center gap-1.5">
+              <span class="text-[11px] text-navy-600 font-medium">Developed by</span>
+              <span class="text-xs font-bold text-navy-950 group-hover:text-navy-700 font-mono transition-colors">Nanstack</span>
+              <span class="w-1.5 h-1.5 rounded-full bg-navy-600"></span>
+            </div>
+            <div class="text-[10px] text-navy-700 group-hover:text-navy-900 font-mono flex items-center gap-1 font-semibold">
+              <span>nanstack.tech</span>
+              <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+            </div>
+          </div>
+        </a>
+      </div>
+
+      <!-- System Status -->
+      <div class="text-xs text-navy-600 text-center md:text-right font-medium">
+        <div>Botany Acoustic Care &copy; 2026</div>
+        <div class="text-[11px] text-navy-700 flex items-center justify-center md:justify-end gap-1 mt-0.5 font-semibold">
+          <span class="w-1.5 h-1.5 rounded-full bg-navy-600"></span>
+          <span>Sensor Network Active</span>
+        </div>
+      </div>
+
+    </div>
+  </footer>
+
+  <!-- Application Logic & Scripts -->
+  <script>
+    let audioData = null;
+    let isPlaying = false;
+    let mediaRecorder = null;
+    let audioChunks = [];
+    let recordTimerInterval = null;
+    let isRecording = false;
+    let playbackSpeed = 1.0;
+
+    const audioElement = document.getElementById('audio-element');
+    const playBtn = document.getElementById('play-btn');
+    const playIcon = document.getElementById('play-icon');
+    const pauseIcon = document.getElementById('pause-icon');
+    const dropZone = document.getElementById('drop-zone');
+    const fileInput = document.getElementById('file-input');
+
+    // Input Tabs Controller
+    function switchInputTab(tab) {
+      const tabs = ['presets', 'upload', 'record'];
+      tabs.forEach(t => {
+        const btn = document.getElementById(`tab-${t}`);
+        const content = document.getElementById(`content-${t}`);
+        if (t === tab) {
+          btn.className = 'tab-btn px-2 sm:px-4 py-2 sm:py-2 rounded-xl text-xs font-bold transition-all bg-white text-navy-950 shadow-sm border border-navy-200/80 flex items-center justify-center gap-1.5 sm:gap-2 cursor-pointer';
+          content.classList.remove('hidden');
+        } else {
+          btn.className = 'tab-btn px-2 sm:px-4 py-2 sm:py-2 rounded-xl text-xs font-semibold transition-all text-navy-700 hover:text-navy-950 flex items-center justify-center gap-1.5 sm:gap-2 cursor-pointer';
+          content.classList.add('hidden');
+        }
+      });
+    }
+
+    // Modal Controller
+    function openMetricsModal() {
+      document.getElementById('metrics-modal').classList.remove('hidden');
+    }
+    function closeMetricsModal() {
+      document.getElementById('metrics-modal').classList.add('hidden');
+    }
+
+    // Playback Speed Controller
+    function setSpeed(spd, btn) {
+      playbackSpeed = spd;
+      audioElement.playbackRate = spd;
+      document.querySelectorAll('.speed-btn').forEach(b => {
+        b.className = 'speed-btn px-2.5 py-1 text-xs rounded-lg text-navy-700 hover:text-navy-950 cursor-pointer';
+      });
+      btn.className = 'speed-btn px-2.5 py-1 text-xs rounded-lg bg-white text-navy-900 font-bold shadow-xs cursor-pointer';
+    }
+
+    // Drag and drop event listeners
+    ['dragenter', 'dragover'].forEach(eventName => {
+      dropZone.addEventListener(eventName, (e) => {
+        e.preventDefault();
+        dropZone.classList.add('border-navy-600', 'bg-navy-50/70');
+      }, false);
+    });
+
+    ['dragleave', 'drop'].forEach(eventName => {
+      dropZone.addEventListener(eventName, (e) => {
+        e.preventDefault();
+        dropZone.classList.remove('border-navy-600', 'bg-navy-50/70');
+      }, false);
+    });
+
+    dropZone.addEventListener('drop', (e) => {
+      const dt = e.dataTransfer;
+      const files = dt.files;
+      if (files.length > 0) handleFileSelect(files);
+    });
+
+    dropZone.addEventListener('click', () => fileInput.click());
+
+    // True 16-bit PCM WAV Encoder for in-browser audio recordings & WebM decoding
+    async function convertBlobToWav(blob) {
+      const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      const arrayBuffer = await blob.arrayBuffer();
+      const audioBuffer = await audioCtx.decodeAudioData(arrayBuffer);
+
+      const targetSampleRate = 22050;
+      const offlineCtx = new OfflineAudioContext(1, Math.ceil(audioBuffer.duration * targetSampleRate), targetSampleRate);
+      const source = offlineCtx.createBufferSource();
+      source.buffer = audioBuffer;
+      source.connect(offlineCtx.destination);
+      source.start(0);
+
+      const renderedBuffer = await offlineCtx.startRendering();
+      const pcmData = renderedBuffer.getChannelData(0);
+
+      const wavBuffer = encodeWavPCM(pcmData, targetSampleRate);
+      return new Blob([wavBuffer], { type: 'audio/wav' });
+    }
+
+    function encodeWavPCM(samples, sampleRate) {
+      const buffer = new ArrayBuffer(44 + samples.length * 2);
+      const view = new DataView(buffer);
+
+      function writeString(view, offset, string) {
+        for (let i = 0; i < string.length; i++) {
+          view.setUint8(offset + i, string.charCodeAt(i));
+        }
+      }
+
+      writeString(view, 0, 'RIFF');
+      view.setUint32(4, 36 + samples.length * 2, true);
+      writeString(view, 8, 'WAVE');
+      writeString(view, 12, 'fmt ');
+      view.setUint32(16, 16, true);
+      view.setUint16(20, 1, true);
+      view.setUint16(22, 1, true);
+      view.setUint32(24, sampleRate, true);
+      view.setUint32(28, sampleRate * 2, true);
+      view.setUint16(32, 2, true);
+      view.setUint16(34, 16, true);
+      writeString(view, 36, 'data');
+      view.setUint32(40, samples.length * 2, true);
+
+      let offset = 44;
+      for (let i = 0; i < samples.length; i++) {
+        let s = Math.max(-1, Math.min(1, samples[i]));
+        view.setInt16(offset, s < 0 ? s * 0x8000 : s * 0x7FFF, true);
+        offset += 2;
+      }
+
+      return buffer;
+    }
+
+    async function handleFileSelect(files) {
+      if (!files || files.length === 0) return;
+      let file = files[0];
+      if (file.name.toLowerCase().endsWith('.webm') || file.type.includes('webm')) {
+        try {
+          showLoading(true);
+          const wavBlob = await convertBlobToWav(file);
+          file = new File([wavBlob], file.name.replace(/\.[^/.]+$/, "") + ".wav", { type: "audio/wav" });
+        } catch (e) {
+          console.warn("Could not pre-convert WebM:", e);
+        }
+      }
+      uploadAudioFile(file);
+    }
+
+    async function uploadAudioFile(file) {
+      showLoading(true);
+      const formData = new FormData();
+      formData.append('audio', file);
+
+      try {
+        const response = await fetch('/api/upload', {
+          method: 'POST',
+          body: formData
+        });
+        const data = await response.json();
+        showLoading(false);
+        if (data.status === 'success' || data.status === 'irrelevant_audio') {
+          // Deselect presets when user uploads custom audio
+          document.querySelectorAll('.sample-btn').forEach(btn => btn.classList.remove('active-sample'));
+          renderAnalysis(data);
+        } else {
+          // Rejection due to invalid format or unreadable audio: hide prediction HUD and player
+          document.getElementById('results-container').classList.add('hidden');
+          const rejCard = document.getElementById('rejection-card');
+          if (rejCard) rejCard.classList.add('hidden');
+          document.getElementById('player-container').classList.add('hidden');
+          alert('Upload Filtered: ' + (data.message || 'Invalid audio file format.'));
+        }
+      } catch (err) {
+        showLoading(false);
+        document.getElementById('results-container').classList.add('hidden');
+        const rejCard = document.getElementById('rejection-card');
+        if (rejCard) rejCard.classList.add('hidden');
+        alert('Upload failed: ' + err.message);
+      }
+    }
+
+    async function loadSample(filename, btnElement) {
+      document.querySelectorAll('.sample-btn').forEach(btn => {
+        btn.classList.remove('active-sample');
+      });
+      if (btnElement) {
+        btnElement.classList.add('active-sample');
+      }
+
+      showLoading(true);
+      try {
+        const response = await fetch('/api/analyze-sample/' + filename);
+        const data = await response.json();
+        showLoading(false);
+        if (data.status === 'success' || data.status === 'irrelevant_audio') {
+          renderAnalysis(data);
+        } else {
+          alert('Error: ' + data.message);
+        }
+      } catch (err) {
+        showLoading(false);
+        alert('Failed to load sample: ' + err.message);
+      }
+    }
+
+    // Live Microphone Recording Controller
+    async function toggleRecording() {
+      if (isRecording) {
+        stopRecording();
+      } else {
+        startRecording();
+      }
+    }
+
+    async function startRecording() {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        mediaRecorder = new MediaRecorder(stream);
+        audioChunks = [];
+
+        mediaRecorder.ondataavailable = (e) => {
+          if (e.data.size > 0) audioChunks.push(e.data);
+        };
+
+        mediaRecorder.onstop = async () => {
+          stream.getTracks().forEach(track => track.stop());
+          const rawBlob = new Blob(audioChunks, { type: mediaRecorder.mimeType || 'audio/webm' });
+          try {
+            document.getElementById('record-status').textContent = 'Processing 16-Bit WAV...';
+            showLoading(true);
+            const wavBlob = await convertBlobToWav(rawBlob);
+            const audioFile = new File([wavBlob], "live_stem_recording.wav", { type: "audio/wav" });
+            uploadAudioFile(audioFile);
+          } catch (convErr) {
+            console.error("WAV conversion error:", convErr);
+            const audioFile = new File([rawBlob], "live_recording.wav", { type: rawBlob.type });
+            uploadAudioFile(audioFile);
+          }
+        };
+
+        mediaRecorder.start();
+        isRecording = true;
+
+        document.getElementById('record-btn').classList.remove('bg-navy-700', 'hover:bg-navy-600');
+        document.getElementById('record-btn').classList.add('bg-rose-600', 'hover:bg-rose-500');
+        document.getElementById('record-pulse-ring').classList.remove('hidden');
+        document.getElementById('record-status').textContent = 'Listening to Stem Micro-Vibrations...';
+        document.getElementById('record-instruction').textContent = 'Capturing 5 seconds of sound from your sensor.';
+        
+        let secondsLeft = 5;
+        const timerElem = document.getElementById('record-timer');
+        timerElem.classList.remove('hidden');
+        timerElem.textContent = `00:0${secondsLeft}`;
+
+        recordTimerInterval = setInterval(() => {
+          secondsLeft--;
+          timerElem.textContent = `00:0${secondsLeft}`;
+          if (secondsLeft <= 0) {
+            stopRecording();
+          }
+        }, 1000);
+
+      } catch (err) {
+        alert('Microphone access denied: ' + err.message);
+      }
+    }
+
+    function stopRecording() {
+      if (!isRecording) return;
+      isRecording = false;
+      clearInterval(recordTimerInterval);
+      if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+        mediaRecorder.stop();
+      }
+      document.getElementById('record-btn').classList.remove('bg-rose-600', 'hover:bg-rose-500');
+      document.getElementById('record-btn').classList.add('bg-navy-700', 'hover:bg-navy-600');
+      document.getElementById('record-pulse-ring').classList.add('hidden');
+      document.getElementById('record-status').textContent = 'Analyzing Recording...';
+      document.getElementById('record-timer').classList.add('hidden');
+    }
+
+    function showLoading(show) {
+      const loader = document.getElementById('loading-indicator');
+      const results = document.getElementById('results-container');
+      const rejection = document.getElementById('rejection-card');
+      if (show) {
+        loader.classList.remove('hidden');
+        results.classList.add('hidden');
+        if (rejection) rejection.classList.add('hidden');
+      } else {
+        loader.classList.add('hidden');
+      }
+    }
+
+    function renderAnalysis(data) {
+      audioData = data;
+      document.getElementById('player-container').classList.remove('hidden');
+
+      // Audio Player
+      audioElement.src = data.audio_url || '';
+      audioElement.playbackRate = playbackSpeed;
+      audioElement.load();
+      document.getElementById('audio-filename').textContent = data.filename || 'Acoustic Recording';
+      document.getElementById('duration-badge').textContent = (data.duration_sec || 0) + 's Clip';
+      document.getElementById('click-marker-count').textContent = ((data.click_timestamps || []).length) + ' Stress Clicks';
+
+      audioElement.ontimeupdate = () => {
+        const cur = formatTime(audioElement.currentTime);
+        const dur = formatTime(audioElement.duration || data.duration_sec);
+        document.getElementById('audio-time').textContent = cur + ' / ' + dur;
+        
+        if (data.waveform) {
+          drawWaveform(data.waveform, data.click_timestamps, audioElement.currentTime / (audioElement.duration || data.duration_sec));
+        }
+      };
+
+      audioElement.play().then(() => {
+        isPlaying = true;
+        updatePlayIcons();
+      }).catch(() => {
+        isPlaying = false;
+        updatePlayIcons();
+      });
+
+      // Render Visualizations in High-Resolution Light Navy Mode
+      drawWaveform(data.waveform, data.click_timestamps, 0);
+      drawSpectrum(data.spectrum);
+      drawHeatmap(data.heatmap);
+
+      const resultsContainer = document.getElementById('results-container');
+      const rejectionCard = document.getElementById('rejection-card');
+
+      // REJECTION GATE: If irrelevant audio detected, DO NOT predict anything!
+      if (data.status === 'irrelevant_audio' || !data.is_plant_sound || !data.predicted_class) {
+        resultsContainer.classList.add('hidden');
+        if (rejectionCard) {
+          rejectionCard.classList.remove('hidden');
+          const msgElem = document.getElementById('rejection-message');
+          if (msgElem && data.message) {
+            msgElem.textContent = data.message;
+          }
+          rejectionCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+        return;
+      }
+
+      // Valid Plant Acoustic Sound: Hide rejection card and display full diagnostic report
+      if (rejectionCard) rejectionCard.classList.add('hidden');
+      resultsContainer.classList.remove('hidden');
+
+      // Status Card
+      const statusCard = document.getElementById('status-card');
+      const statusBadge = document.getElementById('status-badge');
+      const severityBadge = document.getElementById('severity-badge');
+      const insight = data.botanical_insight || {};
+
+      let cardStyles = {
+        success: 'bg-emerald-50/90 border-emerald-300 text-emerald-950 shadow-sm',
+        warning: 'bg-amber-50/90 border-amber-300 text-amber-950 shadow-sm',
+        danger: 'bg-orange-50/90 border-orange-300 text-orange-950 shadow-sm',
+        critical: 'bg-rose-50/90 border-rose-300 text-rose-950 shadow-sm'
+      };
+
+      let badgeStyles = {
+        success: 'bg-emerald-100 text-emerald-800 border border-emerald-200',
+        warning: 'bg-amber-100 text-amber-800 border border-amber-200',
+        danger: 'bg-orange-100 text-orange-800 border border-orange-200',
+        critical: 'bg-rose-100 text-rose-800 border border-rose-200'
+      };
+
+      const theme = insight.badge || 'success';
+      statusCard.className = 'rounded-3xl p-5 sm:p-6 border transition-all duration-300 break-inside-avoid ' + cardStyles[theme];
+      statusBadge.className = 'px-3.5 py-1 rounded-full text-xs font-extrabold uppercase tracking-wider ' + badgeStyles[theme];
+      statusBadge.textContent = insight.status || data.predicted_class;
+      severityBadge.textContent = insight.severity || 'Status Evaluated';
+
+      document.getElementById('status-title').textContent = data.predicted_class;
+      document.getElementById('status-desc').textContent = insight.description || '';
+      document.getElementById('confidence-val').textContent = (data.confidence || 0) + '%';
+      document.getElementById('metric-clicks-big').textContent = (data.metrics && data.metrics.cavitation_clicks !== undefined) ? data.metrics.cavitation_clicks : '0';
+      document.getElementById('metric-hydraulic-risk').textContent = insight.hydraulic_risk || 'Normal';
+
+      // Class Probabilities Breakdown with Humanized Names
+      const probContainer = document.getElementById('probabilities-container');
+      probContainer.innerHTML = '';
+      (data.breakdown || []).forEach(item => {
+        const isTop = item.name === data.predicted_class;
+        const barColor = isTop ? 'bg-gradient-to-r from-navy-800 via-navy-700 to-navy-500' : 'bg-navy-200';
+        const textColor = isTop ? 'text-navy-950 font-bold' : 'text-navy-700';
+        const topBadge = isTop ? '<span class="text-[9px] px-1.5 py-0.2 rounded bg-navy-100 text-navy-800 border border-navy-200 font-extrabold uppercase ml-1">Top Match</span>' : '';
+        const displayName = item.display_name || item.name;
+        
+        probContainer.innerHTML += `
+          <div>
+            <div class="flex justify-between items-center text-xs mb-1">
+              <span class="${textColor} flex items-center">
+                <span>${displayName}</span>
+                ${topBadge}
+                <span class="text-[10px] text-navy-500 font-normal ml-1.5 hidden sm:inline">(${item.name})</span>
+              </span>
+              <span class="font-mono ${textColor}">${item.probability}%</span>
+            </div>
+            <div class="w-full bg-navy-100 rounded-full h-2.5 overflow-hidden border border-navy-200">
+              <div class="${barColor} h-2.5 rounded-full transition-all duration-500" style="width: ${item.probability}%"></div>
+            </div>
+          </div>
+        `;
+      });
+
+      // Feature Telemetry with Clean High-Contrast Readouts
+      if (data.metrics) {
+        document.getElementById('metric-crest').textContent = data.metrics.crest_factor || '0';
+        document.getElementById('metric-rms').textContent = data.metrics.rms_energy || '0';
+        document.getElementById('metric-centroid').textContent = (data.metrics.spectral_centroid_hz || 0).toLocaleString() + ' Hz';
+        document.getElementById('metric-kurtosis').textContent = data.metrics.wave_kurtosis || '0';
+        document.getElementById('metric-click-rate').textContent = (data.metrics.clicks_per_sec || 0) + ' /s';
+        document.getElementById('metric-ici').textContent = (data.metrics.ici_mean_ms || 0) + ' ms';
+      }
+
+      // Care Actions List
+      const actionsList = document.getElementById('actions-list');
+      actionsList.innerHTML = '';
+      (insight.actions || []).forEach((act, idx) => {
+        actionsList.innerHTML += `
+          <div class="p-4 rounded-2xl bg-navy-50/80 border border-navy-200/90 flex items-start gap-3 shadow-xs hover:border-navy-400 transition-all">
+            <span class="w-7 h-7 rounded-xl bg-navy-200 text-navy-900 text-xs font-bold font-mono flex items-center justify-center shrink-0 mt-0.5 shadow-2xs">
+              ${idx + 1}
+            </span>
+            <span class="text-xs text-navy-900 leading-relaxed font-medium">${act}</span>
+          </div>
+        `;
+      });
+
+      // Signal Quality & Sensor Advisory Warnings
+      const warningsCard = document.getElementById('quality-warnings-card');
+      const warningsList = document.getElementById('quality-warnings-list');
+      if (warningsCard && warningsList) {
+        if (data.quality_warnings && data.quality_warnings.length > 0) {
+          warningsList.innerHTML = '';
+          data.quality_warnings.forEach(w => {
+            warningsList.innerHTML += `<div class="flex items-start gap-1.5"><span>•</span><span>${w}</span></div>`;
+          });
+          warningsCard.classList.remove('hidden');
+        } else {
+          warningsCard.classList.add('hidden');
+        }
+      }
+
+      // Ground-Truth Botanical Disclaimer
+      const discElem = document.getElementById('botanical-disclaimer-text');
+      if (discElem && data.botanical_disclaimer) {
+        discElem.textContent = data.botanical_disclaimer;
+      }
+
+      document.getElementById('player-container').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    function togglePlay() {
+      if (!audioElement.src) return;
+      if (isPlaying) {
+        audioElement.pause();
+        isPlaying = false;
+      } else {
+        audioElement.play();
+        isPlaying = true;
+      }
+      updatePlayIcons();
+    }
+
+    function onAudioEnded() {
+      isPlaying = false;
+      updatePlayIcons();
+    }
+
+    function updatePlayIcons() {
+      if (isPlaying) {
+        playIcon.classList.add('hidden');
+        pauseIcon.classList.remove('hidden');
+      } else {
+        playIcon.classList.remove('hidden');
+        pauseIcon.classList.add('hidden');
+      }
+    }
+
+    function formatTime(seconds) {
+      if (isNaN(seconds)) return '0:00';
+      const mins = Math.floor(seconds / 60);
+      const secs = Math.floor(seconds % 60);
+      return mins + ':' + (secs < 10 ? '0' : '') + secs;
+    }
+
+    function seekAudio(e) {
+      const canvas = document.getElementById('waveform-canvas');
+      const rect = canvas.getBoundingClientRect();
+      const clickX = e.clientX - rect.left;
+      const progress = clickX / canvas.width;
+      if (audioElement.duration) {
+        audioElement.currentTime = progress * audioElement.duration;
+      }
+    }
+
+    // Canvas Visualizers (High-Resolution Light Navy Mode)
+    function drawWaveform(points, clickTimestamps = [], playProgress = 0) {
+      const canvas = document.getElementById('waveform-canvas');
+      const ctx = canvas.getContext('2d');
+      canvas.width = canvas.parentElement.clientWidth;
+      
+      // Clean white background
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      const midY = canvas.height / 2;
+      const step = canvas.width / points.length;
+
+      // Draw Center Baseline
+      ctx.beginPath();
+      ctx.strokeStyle = '#e1ecf7';
+      ctx.lineWidth = 1;
+      ctx.moveTo(0, midY);
+      ctx.lineTo(canvas.width, midY);
+      ctx.stroke();
+
+      // Soft waveform area fill under curve in light navy
+      ctx.beginPath();
+      ctx.moveTo(0, midY);
+      points.forEach((val, i) => {
+        const x = i * step;
+        const y = midY - (val * (canvas.height / 2 - 8));
+        ctx.lineTo(x, y);
+      });
+      ctx.lineTo(canvas.width, midY);
+      const fillGrad = ctx.createLinearGradient(0, 0, 0, canvas.height);
+      fillGrad.addColorStop(0, 'rgba(28, 77, 133, 0.18)');
+      fillGrad.addColorStop(1, 'rgba(28, 77, 133, 0.02)');
+      ctx.fillStyle = fillGrad;
+      ctx.fill();
+
+      // Draw Waveform Line in crisp light navy blue
+      ctx.beginPath();
+      ctx.strokeStyle = '#1c4d85';
+      ctx.lineWidth = 2.0;
+
+      points.forEach((val, i) => {
+        const x = i * step;
+        const y = midY - (val * (canvas.height / 2 - 8));
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      });
+      ctx.stroke();
+
+      // Draw Cavitation Click Indicator Pins
+      if (clickTimestamps && clickTimestamps.length > 0 && audioData) {
+        const duration = audioData.duration_sec || 5.0;
+        clickTimestamps.forEach(ts => {
+          const pinX = (ts / duration) * canvas.width;
+          ctx.beginPath();
+          ctx.strokeStyle = 'rgba(217, 119, 6, 0.75)';
+          ctx.lineWidth = 1.4;
+          ctx.moveTo(pinX, 4);
+          ctx.lineTo(pinX, canvas.height - 4);
+          ctx.stroke();
+
+          // Small pin head dot
+          ctx.beginPath();
+          ctx.fillStyle = '#d97706';
+          ctx.arc(pinX, 6, 2.5, 0, 2 * Math.PI);
+          ctx.fill();
+        });
+      }
+
+      // Draw Live Playback Scrubber Needle
+      if (playProgress > 0) {
+        const needleX = playProgress * canvas.width;
+        ctx.beginPath();
+        ctx.strokeStyle = '#2563a6';
+        ctx.lineWidth = 2.2;
+        ctx.moveTo(needleX, 0);
+        ctx.lineTo(needleX, canvas.height);
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.fillStyle = '#2563a6';
+        ctx.arc(needleX, 5, 3.5, 0, 2 * Math.PI);
+        ctx.fill();
+      }
+    }
+
+    function drawSpectrum(bins) {
+      const canvas = document.getElementById('spectrum-canvas');
+      const ctx = canvas.getContext('2d');
+      canvas.width = canvas.parentElement.clientWidth;
+      
+      // Clean white background
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      const barWidth = (canvas.width / bins.length) - 2;
+
+      bins.forEach((b, i) => {
+        const x = i * (barWidth + 2);
+        const barHeight = (b.magnitude / 100) * (canvas.height - 12);
+        const y = canvas.height - barHeight;
+
+        const grad = ctx.createLinearGradient(0, canvas.height, 0, 0);
+        grad.addColorStop(0, '#1c4d85');
+        grad.addColorStop(1, '#3b7ebd');
+
+        ctx.fillStyle = grad;
+        ctx.beginPath();
+        if (ctx.roundRect) {
+          ctx.roundRect(x, y, barWidth, barHeight, [2, 2, 0, 0]);
+          ctx.fill();
+        } else {
+          ctx.fillRect(x, y, barWidth, barHeight);
+        }
+      });
+    }
+
+    // High-Contrast Decibel Spectrogram
+    function getHeatmapColor(val) {
+      if (val < 8) {
+        // Quiet baseline
+        return '#f0f5fa';
+      } else if (val < 25) {
+        // Low fluid resonance: Soft light blue
+        const t = (val - 8) / 17;
+        const r = Math.round(197 + t * (155 - 197));
+        const g = Math.round(216 + t * (191 - 216));
+        const b = Math.round(237 + t * (224 - 237));
+        return `rgb(${r}, ${g}, ${b})`;
+      } else if (val < 50) {
+        // Active acoustic signals: Bright Navy Cyan
+        const t = (val - 25) / 25;
+        const r = Math.round(59 + t * (28 - 59));
+        const g = Math.round(126 + t * (77 - 126));
+        const b = Math.round(189 + t * (133 - 189));
+        return `rgb(${r}, ${g}, ${b})`;
+      } else if (val < 78) {
+        // Intense acoustic stress: Amber / Gold
+        const t = (val - 50) / 28;
+        const r = Math.round(28 + t * (245 - 28));
+        const g = Math.round(77 + t * (158 - 77));
+        const b = Math.round(133 + t * (11 - 133));
+        return `rgb(${r}, ${g}, ${b})`;
+      } else {
+        // Peak cavitation spike: Bright Coral Rose
+        const t = Math.min(1, (val - 78) / 22);
+        const r = Math.round(245 + t * (244 - 245));
+        const g = Math.round(158 + t * (63 - 158));
+        const b = Math.round(11 + t * (94 - 11));
+        return `rgb(${r}, ${g}, ${b})`;
+      }
+    }
+
+    function drawHeatmap(matrix) {
+      const canvas = document.getElementById('heatmap-canvas');
+      const ctx = canvas.getContext('2d');
+      canvas.width = canvas.parentElement.clientWidth;
+      
+      // Clean white background
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      if (!matrix || matrix.length === 0) return;
+
+      const numRows = matrix.length;
+      const numCols = matrix[0].length;
+      const cellW = canvas.width / numCols;
+      const cellH = canvas.height / numRows;
+
+      for (let r = 0; r < numRows; r++) {
+        for (let c = 0; c < numCols; c++) {
+          const val = matrix[r][c];
+          const x = c * cellW;
+          const y = (numRows - 1 - r) * cellH;
+
+          ctx.fillStyle = getHeatmapColor(val);
+          ctx.fillRect(x, y, cellW + 0.5, cellH + 0.5);
+        }
+      }
+    }
+
+    window.addEventListener('resize', () => {
+      if (audioData) {
+        drawWaveform(audioData.waveform, audioData.click_timestamps);
+        drawSpectrum(audioData.spectrum);
+        drawHeatmap(audioData.heatmap);
+      }
+    });
+
+    window.addEventListener('DOMContentLoaded', () => {
+      const firstBtn = document.querySelector('[data-filename="drought_cavitation.wav"]');
+      if (firstBtn) {
+        loadSample('drought_cavitation.wav', firstBtn);
+      }
+    });
+  </script>
+</body>
+</html>
