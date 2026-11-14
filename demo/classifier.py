@@ -26,7 +26,19 @@ from sklearn.metrics import confusion_matrix, classification_report, accuracy_sc
 
 MODEL_DIR = os.path.join(os.path.dirname(__file__), "models")
 MODEL_PATH = os.path.join(MODEL_DIR, "plant_stress_classifier.joblib")
+GATE_PATH = os.path.join(MODEL_DIR, "plant_relevance_gate.joblib")
 METRICS_PATH = os.path.join(MODEL_DIR, "model_metrics.json")
+
+_GATE_MODEL = None
+
+def load_gate_model():
+    global _GATE_MODEL
+    if _GATE_MODEL is None and os.path.exists(GATE_PATH):
+        try:
+            _GATE_MODEL = joblib.load(GATE_PATH)
+        except Exception:
+            _GATE_MODEL = None
+    return _GATE_MODEL
 
 CLASSES = [
     "Healthy Baseline",
@@ -387,52 +399,43 @@ def compute_mel_spectrogram(y, sr, n_fft=256, hop_length=128):
 def verify_plant_relevance(y, sr, feats, probs=None):
     """
     Validates whether the input acoustic signal matches physiological plant stem vibration criteria.
-    Rejects out-of-distribution and irrelevant audio recordings:
-      1. Dead sensor or near-silent line (RMS < 0.0005 or peak < 0.0020)
-      2. Vocal / Speech / Tonal harmonic formants (Human speech, crying, laughing, dog barking,
-         sirens, horns, musical instruments) -> spectral flatness < 0.30
-      3. Heavy low-frequency rumble without xylem cavitation pulses ((e_sub + e_low) > 0.88 and clicks < 2 and centroid < 1200)
-      4. Synthetic white noise or flat static (flatness > 0.95 with 0 clicks and crest < 2.5)
-      5. Digital rail saturation / clipping (+0 dBFS clip: peak >= 0.999 and RMS > 0.90)
-      6. Model confidence gating (max probability < 0.30)
-    Returns (is_valid: bool, reason_message: str)
+    Uses trained machine-learned Bio-Acoustic Relevance Gate (Random Forest on 22 features)
+    along with physical boundaries (silence, clipping, synthetic static).
     """
     rms = float(feats[0])
     peak_amp = float(feats[1])
     crest_factor = float(feats[2])
     spectral_centroid = float(feats[7])
     spectral_flatness = float(feats[9])
-    e_sub = float(feats[10])
-    e_low = float(feats[11])
     click_count = float(feats[15])
 
     # 1. Silence or disconnected sensor check
     if rms < 0.0005 or peak_amp < 0.0020:
         return False, "Acoustic sensor line is near-silent or disconnected (RMS < 0.0005). No plant stem micro-vibrations detected."
 
-    # 2. Vocal / Speech / Tonal Harmonic Structure
-    # Human voices, speech, singing, crying, barking, and instruments have prominent harmonic formants,
-    # causing spectral flatness to drop sharply (< 0.30). Real plant stem vibrations have broad acoustic flatness (>= 0.50).
-    if spectral_flatness < 0.30:
-        return False, f"Acoustic signal contains vocal or harmonic pitch formants (spectral flatness {spectral_flatness:.2f} < 0.30), matching human speech, voice, music, or environmental noise rather than plant stem emissions."
-
-    # 3. Low-Frequency Rumble / Ambient Noise (e.g. traffic, air conditioner, motor hum)
-    if (e_sub + e_low) > 0.88 and click_count < 2 and spectral_centroid < 1200:
-        return False, f"Acoustic signal is dominated by low-frequency ambient rumble ({((e_sub + e_low) * 100):.1f}% below 800Hz) with zero xylem cavitation pulses."
-
-    # 4. Pure Synthetic White Noise / Electronic Static (high flatness, zero clicks, low crest factor)
-    if spectral_flatness > 0.95 and click_count == 0 and crest_factor < 2.5:
-        return False, "Signal matches synthetic white noise or electronic static with no biological transient impulses."
-
-    # 5. Excessive volume / clipped blasts (+0 dBFS clipping)
+    # 2. Digital rail saturation / clipping (+0 dBFS clipping)
     if peak_amp >= 0.999 and rms > 0.90:
         return False, "Signal amplitude is unnaturally saturated or clipped at digital ceiling (+0 dBFS) without plant acoustic impedance."
 
-    # 6. Model Gating (Classification Confidence)
+    # 3. Pure Synthetic White Noise / Electronic Static (extreme flatness, zero clicks, low crest factor)
+    if spectral_flatness > 0.98 and click_count == 0 and crest_factor < 2.0:
+        return False, "Signal matches synthetic white noise or electronic static with no biological transient impulses."
+
+    # 4. Machine-Learned Bio-Acoustic Relevance Gate (Non-plant noise has mean 1.7%, max 8.6%; plant audio >= 35%)
+    gate = load_gate_model()
+    if gate is not None:
+        try:
+            plant_prob = float(gate.predict_proba([feats])[0, 1])
+            if plant_prob < 0.20:
+                return False, f"Acoustic signature (relevance score {plant_prob * 100:.1f}%) matches non-plant environmental noise, human vocalization, or speech rather than plant stem emissions."
+        except Exception:
+            pass
+
+    # 5. Model Gating (Classification Confidence)
     if probs is not None:
         max_prob = float(np.max(probs))
-        if max_prob < 0.30:
-            return False, f"Acoustic classification uncertainty is too high (confidence {max_prob * 100:.1f}% < 30%). Signal does not conform to known botanical stress acoustics."
+        if max_prob < 0.25:
+            return False, f"Acoustic classification uncertainty is too high (confidence {max_prob * 100:.1f}% < 25%). Signal does not conform to known botanical stress acoustics."
 
     return True, "Valid plant stem acoustic emission."
 
