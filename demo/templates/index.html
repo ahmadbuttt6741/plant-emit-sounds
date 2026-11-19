@@ -148,25 +148,30 @@
   <header class="sticky top-0 z-50 bg-white/95 backdrop-blur-xl border-b border-navy-200/90 px-3 sm:px-6 py-2.5 transition-all shadow-xs">
     <div class="max-w-7xl mx-auto flex items-center justify-between gap-2 sm:gap-4">
       
-      <!-- Brand & Title -->
-      <div class="flex items-center space-x-2.5 sm:space-x-3 min-w-0">
-        <a href="/dashboard" class="flex items-center space-x-2.5 sm:space-x-3 group cursor-pointer">
-          <div class="relative flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-gradient-to-tr from-navy-800 via-navy-700 to-navy-500 p-0.5 shadow-sm shadow-navy-700/20 shrink-0 group-hover:scale-105 transition-transform">
-            <div class="w-full h-full bg-white rounded-[14px] flex items-center justify-center">
-              <svg class="w-4 h-4 sm:w-5 sm:h-5 text-navy-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 100-6 3 3 0 000 6z" />
-              </svg>
-            </div>
-            <span class="absolute -bottom-0.5 -right-0.5 flex h-2.5 w-2.5">
-              <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-navy-400 opacity-75"></span>
-              <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-navy-600 border-2 border-white"></span>
-            </span>
+      <!-- Brand & Title: Department of Botany, University of Narowal -->
+      <div class="flex items-center min-w-0">
+        <a href="/dashboard" class="flex items-center gap-2.5 sm:gap-3 group cursor-pointer min-w-0">
+          <div class="h-10 sm:h-11 w-auto flex items-center justify-center shrink-0">
+            <img src="/static/images/uon_logo.png" alt="University Of Narowal Logo" class="h-10 sm:h-11 w-auto object-contain group-hover:scale-105 transition-transform drop-shadow-2xs">
           </div>
           <div class="min-w-0">
-            <div class="flex items-center gap-1.5 sm:gap-2">
-              <span class="font-extrabold text-base sm:text-lg tracking-tight text-navy-950 group-hover:text-navy-700 transition-colors truncate">PhytoEcho</span>
+            <div class="font-extrabold text-sm sm:text-base tracking-tight text-navy-950 group-hover:text-navy-700 transition-colors leading-tight truncate">
+              Department Of Botany
             </div>
-            <p class="text-[11px] text-navy-600 font-medium hidden sm:block truncate">Plant Acoustic Health Monitor</p>
+            <div class="text-[10px] sm:text-[11px] text-navy-600 font-semibold tracking-wide leading-tight truncate">
+              University Of Narowal
+            </div>
+          </div>
+          <div class="hidden lg:flex items-center pl-3 ml-0.5 border-l border-navy-200">
+            <div class="text-left">
+              <div class="text-xs font-bold text-navy-900 leading-tight flex items-center gap-1.5">
+                <span>PhytoEcho</span>
+                <span class="text-[9px] px-1.5 py-0.2 rounded bg-navy-100 text-navy-700 font-mono font-medium">AI Bio-Acoustics</span>
+              </div>
+              <div class="text-[10px] text-navy-500 font-medium leading-tight">
+                Plant Acoustic Health Monitor
+              </div>
+            </div>
           </div>
         </a>
       </div>
